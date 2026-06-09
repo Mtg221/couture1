@@ -65,13 +65,13 @@ export default function CommandeDetail() {
             </div>
 
             {/* Mesures */}
-            {cmd.mesures && (
-              <div className="mt-4 pt-4 border-t">
-                <h3 className="font-semibold text-gray-700 mb-3 text-sm">Mesures (cm)</h3>
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                  {Object.entries(cmd.mesures)
-                    .filter(([, v]) => v && k !== 'autres')
-                    .map(([k, v]) => {
+{cmd.mesures && (
+                <div className="mt-4 pt-4 border-t">
+                  <h3 className="font-semibold text-gray-700 mb-3 text-sm">Mesures (cm)</h3>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                    {Object.entries(cmd.mesures)
+                      .filter(([k, v]) => v && k !== 'autres')
+                      .map(([k, v]) => {
                       const labels = {
                         cou: 'Cou', tourPoitrine: 'Poitrine', longueurMancheCourte: 'Longueur manche courte',
                         longueurMancheLongue: 'Longueur manche longue', tourManche: 'Tour de manche',
