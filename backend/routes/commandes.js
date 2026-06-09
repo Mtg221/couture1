@@ -24,6 +24,12 @@ router.get('/:id', async (req, res) => {
   res.json(commande);
 });
 
+router.get('/client/:clientId', async (req, res) => {
+  const commandes = await Commande.find({ client: req.params.clientId })
+    .sort({ createdAt: -1 });
+  res.json(commandes);
+});
+
 // Commande depuis le site public (pas besoin d'auth)
 router.post('/public', upload.array('images', 5), async (req, res) => {
   try {
