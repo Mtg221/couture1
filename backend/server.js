@@ -10,10 +10,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin || origin.endsWith('.vercel.app') || origin === process.env.CLIENT_URL) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      process.env.CLIENT_URL,
+      ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL.replace('https://', '')] : []),
+    ];
+    
+    if (!origin || allowedOrigins.some(o => origin === o || origin.endsWith('.vercel.app') || origin.endsWith(o))) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn('CORS blocked:', origin);
+      callback(null, false);
     }
   },
   credentials: true

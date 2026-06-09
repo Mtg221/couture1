@@ -14,6 +14,7 @@ import Commande from './pages/public/Commande';
 import Login           from './pages/admin/Login';
 import Dashboard       from './pages/admin/Dashboard';
 import Clients         from './pages/admin/Clients';
+import ClientDetail    from './pages/admin/ClientDetail';
 import Commandes       from './pages/admin/Commandes';
 import CommandeDetail  from './pages/admin/CommandeDetail';
 import GalerieAdmin    from './pages/admin/GalerieAdmin';
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/admin/clients"            element={<PrivateRoute><Clients /></PrivateRoute>} />
+          <Route path="/admin/clients/:id"        element={<PrivateRoute><ClientDetail /></PrivateRoute>} />
           <Route path="/admin/commandes"          element={<PrivateRoute><Commandes /></PrivateRoute>} />
           <Route path="/admin/commandes/:id"      element={<PrivateRoute><CommandeDetail /></PrivateRoute>} />
           <Route path="/admin/galerie"            element={<PrivateRoute adminOnly><GalerieAdmin /></PrivateRoute>} />
