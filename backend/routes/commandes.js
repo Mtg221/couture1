@@ -4,6 +4,28 @@ const Client   = require('../models/Client');
 const upload   = require('../middleware/upload');
 const { protect, adminOnly } = require('../middleware/auth');
 
+// Route publique - doit être définie AVANT le middleware protect
+router.post('/public', upload.array('images', 5), async (req, res) => {
+  try {
+    const { nom, telephone, typeVetement, description, ...mesures } = req.body;
+    let client = await Client.findOne({ telephone });
+    if (!client) client = await Client.create({ nom, telephone });
+
+    const images = req.files?.map(f => f.path) || [];
+    const commande = await Commande.create({
+      client: client._id,
+      typeVetement,
+      description,
+      mesures,
+      images,
+      sourceCommande: 'public',
+    });
+    res.status(201).json({ message: 'Commande reçue', id: commande._id });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 router.use(protect);
 
 router.get('/', async (req, res) => {
@@ -28,28 +50,6 @@ router.get('/client/:clientId', async (req, res) => {
   const commandes = await Commande.find({ client: req.params.clientId })
     .sort({ createdAt: -1 });
   res.json(commandes);
-});
-
-// Commande depuis le site public (pas besoin d'auth)
-router.post('/public', upload.array('images', 5), async (req, res) => {
-  try {
-    const { nom, telephone, typeVetement, description, ...mesures } = req.body;
-    let client = await Client.findOne({ telephone });
-    if (!client) client = await Client.create({ nom, telephone });
-
-    const images = req.files?.map(f => f.path) || [];
-    const commande = await Commande.create({
-      client: client._id,
-      typeVetement,
-      description,
-      mesures,
-      images,
-      sourceCommande: 'public',
-    });
-    res.status(201).json({ message: 'Commande reçue', id: commande._id });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
 });
 
 router.post('/', upload.array('images', 5), async (req, res) => {
