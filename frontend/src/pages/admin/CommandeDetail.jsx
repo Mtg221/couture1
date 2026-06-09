@@ -56,6 +56,7 @@ export default function CommandeDetail() {
             <div className="space-y-3 text-sm">
               <div><span className="text-gray-500">Client :</span> <span className="font-medium ml-2">{cmd.client?.nom}</span></div>
               <div><span className="text-gray-500">Téléphone :</span> <span className="font-medium ml-2">{cmd.client?.telephone}</span></div>
+              <div><span className="text-gray-500">Sexe :</span> <span className="font-medium ml-2 capitalize">{cmd.sexe || 'N/A'}</span></div>
               <div><span className="text-gray-500">Vêtement :</span> <span className="font-medium ml-2">{cmd.typeVetement}</span></div>
               <div><span className="text-gray-500">Description :</span> <p className="mt-1 text-gray-700">{cmd.description}</p></div>
               {cmd.dateLivraison && (
@@ -68,12 +69,29 @@ export default function CommandeDetail() {
               <div className="mt-4 pt-4 border-t">
                 <h3 className="font-semibold text-gray-700 mb-3 text-sm">Mesures (cm)</h3>
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                  {Object.entries(cmd.mesures).filter(([, v]) => v).map(([k, v]) => (
-                    <div key={k} className="flex justify-between">
-                      <span className="text-gray-400 capitalize">{k.replace(/([A-Z])/g, ' $1')} :</span>
-                      <span className="font-medium">{v}</span>
-                    </div>
-                  ))}
+                  {Object.entries(cmd.mesures)
+                    .filter(([, v]) => v && k !== 'autres')
+                    .map(([k, v]) => {
+                      const labels = {
+                        cou: 'Cou', tourPoitrine: 'Poitrine', longueurMancheCourte: 'Longueur manche courte',
+                        longueurMancheLongue: 'Longueur manche longue', tourManche: 'Tour de manche',
+                        tourPoignet: 'Tour de poignet', longueurBoubou: 'Longueur boubou',
+                        epaules: 'Epaule', ceinture: 'Ceinture', tourFesse: 'Tour de fesse',
+                        tourCuisse: 'Tour de cuisse', tourGenou: 'Tour de genou', tourMollet: 'Tour de mollet',
+                        longueurPantalon: 'Longueur pantalon', longueurDemiSaison: 'Longueur demi-saison',
+                        tourTaille: 'Taille', longueurHaut: 'Longueur haut', longueurMariniere: 'Longueur marinière',
+                        longueurBoubou3Quart: 'Longueur boubou 3/4', longueurJupe: 'Longueur jupe',
+                        longueurPagne: 'Longueur pagne', autres: 'Autres',
+                        hauteurTotal: 'Hauteur totale', hauteurDos: 'Hauteur du dos',
+                        longueurBras: 'Longueur des bras', tourBras: 'Tour de bras', tourHanches: 'Tour de hanches',
+                      };
+                      return (
+                        <div key={k} className="flex justify-between">
+                          <span className="text-gray-400">{labels[k] || k} :</span>
+                          <span className="font-medium">{v}</span>
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             )}

@@ -6,14 +6,18 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
 export default function Commande() {
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
-  const [files, setFiles] = useState([]);
-  const [sent, setSent]   = useState(false);
+  const { register, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm();
+  const [files, setFiles]   = useState([]);
+  const [sent, setSent]     = useState(false);
+  const sexe = watch('sexe');
 
   const onSubmit = async (data) => {
     try {
       const form = new FormData();
-      Object.entries(data).forEach(([k, v]) => form.append(k, v));
+      form.append('sexe', data.sexe);
+      Object.entries(data).forEach(([k, v]) => {
+        if (k !== 'sexe') form.append(k, v);
+      });
       files.forEach(f => form.append('images', f));
       await api.post('/commandes/public', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -71,6 +75,13 @@ export default function Commande() {
             <h2 className="font-semibold text-gray-700 mb-3 pb-2 border-b">Détails du vêtement</h2>
             <div className="space-y-4">
               <div>
+                <label className="label">Sexe</label>
+                <select {...register('sexe', { required: true })} className="input">
+                  <option value="homme">Homme</option>
+                  <option value="femme">Femme</option>
+                </select>
+              </div>
+              <div>
                 <label className="label">Type de vêtement</label>
                 <select {...register('typeVetement', { required: true })} className="input">
                   <option value="">Choisir...</option>
@@ -91,21 +102,52 @@ export default function Commande() {
           <section>
             <h2 className="font-semibold text-gray-700 mb-3 pb-2 border-b">Vos mesures (en cm)</h2>
             <div className="grid grid-cols-2 gap-4">
-              {[
-                ['tourPoitrine', 'Tour de poitrine'],
-                ['tourTaille', 'Tour de taille'],
-                ['tourHanches', 'Tour de hanches'],
-                ['hauteurTotal', 'Hauteur totale'],
-                ['hauteurDos', 'Hauteur du dos'],
-                ['longueurBras', 'Longueur des bras'],
-                ['tourBras', 'Tour de bras'],
-                ['epaules', 'Largeur épaules'],
-              ].map(([name, label]) => (
-                <div key={name}>
-                  <label className="label">{label}</label>
-                  <input type="number" {...register(name)} className="input" placeholder="cm" />
-                </div>
-              ))}
+              {sexe === 'homme' && (
+                <>
+                  <div><label className="label">Cou</label><input type="number" {...register('cou')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Poitrine</label><input type="number" {...register('tourPoitrine')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur manche courte</label><input type="number" {...register('longueurMancheCourte')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur manche longue</label><input type="number" {...register('longueurMancheLongue')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de manche</label><input type="number" {...register('tourManche')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de poignet</label><input type="number" {...register('tourPoignet')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur boubou</label><input type="number" {...register('longueurBoubou')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Epaule</label><input type="number" {...register('epaules')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Ceinture</label><input type="number" {...register('ceinture')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de fesse</label><input type="number" {...register('tourFesse')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour d'une cuisse</label><input type="number" {...register('tourCuisse')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de genou</label><input type="number" {...register('tourGenou')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de mollet</label><input type="number" {...register('tourMollet')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur pantalon</label><input type="number" {...register('longueurPantalon')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur demi-saison</label><input type="number" {...register('longueurDemiSaison')} className="input" placeholder="cm" /></div>
+                </>
+              )}
+              {sexe === 'femme' && (
+                <>
+                  <div><label className="label">Cou</label><input type="number" {...register('cou')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Poitrine</label><input type="number" {...register('tourPoitrine')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur manche courte</label><input type="number" {...register('longueurMancheCourte')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur manche longue</label><input type="number" {...register('longueurMancheLongue')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de manche</label><input type="number" {...register('tourManche')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de poignet</label><input type="number" {...register('tourPoignet')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur boubou</label><input type="number" {...register('longueurBoubou')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Epaule</label><input type="number" {...register('epaules')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Taille</label><input type="number" {...register('tourTaille')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Ceinture</label><input type="number" {...register('ceinture')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de fesse</label><input type="number" {...register('tourFesse')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour d'une cuisse</label><input type="number" {...register('tourCuisse')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de genou</label><input type="number" {...register('tourGenou')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Tour de mollet</label><input type="number" {...register('tourMollet')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur pantalon</label><input type="number" {...register('longueurPantalon')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur haut</label><input type="number" {...register('longueurHaut')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur marinière</label><input type="number" {...register('longueurMariniere')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur boubou 3/4</label><input type="number" {...register('longueurBoubou3Quart')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur jupe</label><input type="number" {...register('longueurJupe')} className="input" placeholder="cm" /></div>
+                  <div><label className="label">Longueur pagne</label><input type="number" {...register('longueurPagne')} className="input" placeholder="cm" /></div>
+                </>
+              )}
+              {!sexe && (
+                <div className="col-span-2 text-center text-gray-400 py-4">Sélectionnez le sexe pour afficher les mesures</div>
+              )}
               <div className="col-span-2">
                 <label className="label">Autres précisions</label>
                 <input {...register('autres')} className="input" placeholder="Ex: longueur robe jusqu'aux chevilles..." />
