@@ -31,12 +31,12 @@ export default function Login() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
-            <label className="label">Email</label>
+            <label className="label">Email ou identifiant</label>
             <input 
               {...register('email', { required: true })} 
               className="input" 
-              placeholder="votre@email.com" 
-              type="email"
+              placeholder="admin ou votre@email.com" 
+              type="text"
               autoFocus 
             />
           </div>
