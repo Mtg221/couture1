@@ -66,8 +66,12 @@ router.get('/client/:clientId', async (req, res) => {
   res.json(commandes);
 });
 
-router.post('/', adminOnly, upload.array('images', 5), async (req, res) => {
+router.post('/', protect, upload.array('images', 5), async (req, res) => {
   try {
+    if (req.user.role === 'client') {
+      req.body.client = req.user.clientId;
+    }
+    
     const images = req.files?.map(f => f.path) || [];
     const commande = await Commande.create({ ...req.body, images });
     res.status(201).json(commande);

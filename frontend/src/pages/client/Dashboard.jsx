@@ -60,12 +60,20 @@ export default function ClientDashboard() {
             <h1 className="text-3xl font-bold text-gray-800 mb-1">Mon Espace</h1>
             <p className="text-gray-500">{client.nom}</p>
           </div>
-          <button 
-            onClick={() => { logout(); navigate('/login'); }}
-            className="text-sm text-gray-600 hover:text-rose-500 font-medium"
-          >
-            Déconnexion
-          </button>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/client/nouvelle-commande')}
+              className="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl font-medium transition-colors text-sm"
+            >
+              + Nouvelle commande
+            </button>
+            <button 
+              onClick={() => { logout(); navigate('/login'); }}
+              className="text-sm text-gray-600 hover:text-rose-500 font-medium"
+            >
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">

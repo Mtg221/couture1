@@ -22,6 +22,7 @@ import Messages        from './pages/admin/Messages';
 
 // Client
 import ClientDashboard from './pages/client/Dashboard';
+import NewCommande from './pages/client/NewCommande';
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ export default function App() {
 
           {/* Client */}
           <Route path="/client/dashboard" element={<PrivateRoute><ClientDashboard /></PrivateRoute>} />
+          <Route path="/client/nouvelle-commande" element={<PrivateRoute><NewCommande /></PrivateRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
