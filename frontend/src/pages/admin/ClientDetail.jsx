@@ -37,12 +37,18 @@ export default function ClientDetail() {
     try {
       const mesuresHomme = {};
       const mesuresFemme = {};
+      
+      const hommeKeys = ['cou', 'poitrine', 'longueurMancheCourte', 'longueurMancheLongue', 'tourDeManche', 'tourDePoignet', 'longueurBoubou', 'epaule', 'ceinture', 'tourDeFesse', 'tourDuneCuisse', 'tourDeGenou', 'tourDeMollet', 'longueurPantalon', 'longueurDemiSaison'];
+      const femmeKeys = ['cou', 'poitrine', 'longueurMancheCourte', 'longueurMancheLongue', 'tourDeManche', 'tourDePoignet', 'longueurBoubou', 'epaule', 'taille', 'ceinture', 'tourDeFesse', 'tourDuneCuisse', 'tourDeGenou', 'tourDeMollet', 'longueurPantalon', 'longueurHaut', 'longueurMariniere', 'longueurBoubou3Quart', 'longueurJupe', 'longueurPagne'];
+      
       Object.keys(data).forEach(key => {
-        if (key !== 'nom' && key !== 'telephone' && key !== 'email' && key !== 'password' && key !== 'sexe' && key !== 'notes') {
-          if (mesuresHomme[key] !== undefined) mesuresHomme[key] = data[key];
-          else mesuresFemme[key] = data[key];
+        if (hommeKeys.includes(key)) {
+          if (data[key]) mesuresHomme[key] = Number(data[key]);
+        } else if (femmeKeys.includes(key)) {
+          if (data[key]) mesuresFemme[key] = Number(data[key]);
         }
       });
+      
       await api.put(`/clients/${id}`, {
         nom: data.nom,
         telephone: data.telephone,
