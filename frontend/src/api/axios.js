@@ -17,7 +17,7 @@ api.interceptors.response.use(
       const token = localStorage.getItem('token');
       if (token) {
         localStorage.removeItem('token');
-        window.location.href = '/admin/login';
+        window.location.href = '/login';
       }
     }
     return Promise.reject(err);
