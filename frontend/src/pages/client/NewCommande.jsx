@@ -95,20 +95,6 @@ export default function NewCommande() {
             )}
           </section>
 
-          <section>
-            <h2 className="font-semibold text-gray-700 mb-3 pb-2 border-b">Prix et paiement</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="label">Prix total (FCFA)</label>
-                <input type="number" {...register('prixTotal', { min: 0 })} className="input" placeholder="0" />
-              </div>
-              <div>
-                <label className="label">Avance versée (FCFA)</label>
-                <input type="number" {...register('avancePaye', { min: 0 })} className="input" placeholder="0" />
-              </div>
-            </div>
-          </section>
-
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
             <p className="font-medium mb-1">📏 Prise des mesures</p>
             <p>Si vous avez déjà des mesures enregistrées dans votre profil, elles seront automatiquement associées à cette commande. Sinon, nous prendrons vos mesures lors d'un rendez-vous.</p>
