@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { useAuth } from '../../context/AuthContext';
 
 const STATUTS = ['en_attente', 'en_cours', 'prete', 'livree', 'refusee'];
 

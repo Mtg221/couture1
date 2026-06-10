@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
   const { login } = useAuth();

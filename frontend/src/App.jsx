@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './context/AuthContext.jsx';
+import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import WhatsAppButton from './components/WhatsAppButton';
 
