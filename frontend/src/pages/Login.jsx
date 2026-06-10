@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext.jsx';
+import logo from '../assets/logo.png';
 
 export default function Login() {
   const { login } = useAuth();
@@ -22,9 +23,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-100 flex items-center justify-center px-4 py-8">
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full max-w-md">
         <div className="text-center mb-8">
+          <img src={logo} alt="NKG Couture" className="h-20 w-auto mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Bienvenue</h1>
           <p className="text-gray-500 text-sm">Connectez-vous à votre espace</p>
         </div>

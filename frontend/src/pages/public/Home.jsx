@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import logo from '../../assets/logo.png';
 
 export default function Home() {
   return (
@@ -8,7 +9,8 @@ export default function Home() {
       <Navbar />
 
       {/* Hero */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-24 bg-gradient-to-b from-rose-50 to-white">
+      <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-16 bg-gradient-to-b from-rose-50 to-white">
+        <img src={logo} alt="NKG Couture" className="h-32 md:h-40 w-auto mb-8" />
         <span className="text-rose-500 font-medium text-sm tracking-widest uppercase mb-4">
           Atelier de couture · Dakar
         </span>

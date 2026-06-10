@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -15,9 +16,9 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
-        <Link to="/" className="text-xl font-bold text-rose-600 tracking-wide">
-          Atelier Couture
+      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-auto py-2">
+        <Link to="/" className="flex items-center gap-3">
+          <img src={logo} alt="NKG Couture" className="h-12 w-auto" />
         </Link>
 
         {/* Desktop */}

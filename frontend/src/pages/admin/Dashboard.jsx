@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext.jsx';
 import StatCard from '../../components/StatCard';
+import logo from '../../assets/logo.png';
 
 const STATUT_COLORS = {
   en_attente: 'bg-amber-100 text-amber-700',
@@ -26,7 +27,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-800">Atelier · Admin</h1>
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="NKG Couture" className="h-10 w-auto" />
+        </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-500">{user?.username}</span>
           <button onClick={logout} className="text-sm text-rose-500 hover:underline">Déconnexion</button>
