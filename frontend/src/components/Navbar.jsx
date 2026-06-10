@@ -10,7 +10,7 @@ export default function Navbar() {
     { to: '/galerie',  label: 'Galerie' },
     { to: '/commande', label: 'Commander' },
     { to: '/contact',  label: 'Contact' },
-    { to: '/admin/login', label: 'Admin', admin: true },
+    { to: '/login', label: 'Connexion', auth: true },
   ];
 
   return (
@@ -27,7 +27,7 @@ export default function Navbar() {
               key={l.to}
               to={l.to}
               className={`text-sm font-medium transition-colors ${
-                l.admin
+                l.auth
                   ? 'bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600'
                   : pathname === l.to
                     ? 'text-rose-600'
@@ -60,7 +60,7 @@ export default function Navbar() {
               to={l.to}
               onClick={() => setOpen(false)}
               className={`py-2 font-medium ${
-                l.admin
+                l.auth
                   ? 'bg-rose-500 text-white px-4 rounded-lg text-center'
                   : 'text-gray-700'
               }`}

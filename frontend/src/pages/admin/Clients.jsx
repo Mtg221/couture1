@@ -8,8 +8,7 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [search, setSearch]   = useState('');
   const [modal, setModal]     = useState(false);
-  const { register, handleSubmit, reset, watch } = useForm();
-  const sexe = watch('sexe');
+  const { register, handleSubmit, reset } = useForm();
 
   const load = () => api.get('/clients', { params: { search } }).then(r => setClients(r.data));
   useEffect(() => { load(); }, [search]);
@@ -19,30 +18,10 @@ export default function Clients() {
       await api.post('/clients', data);
       toast.success('Client ajouté');
       setModal(false); reset(); load();
-    } catch { toast.error('Erreur'); }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Erreur');
+    }
   };
-
-  const mesuresHomme = [
-    ['cou', 'Cou'], ['poitrine', 'Poitrine'], ['longueurMancheCourte', 'Longueur manche courte'],
-    ['longueurMancheLongue', 'Longueur manche longue'], ['tourDeManche', 'Tour de manche'],
-    ['tourDePoignet', 'Tour de poignet'], ['longueurBoubou', 'Longueur boubou'],
-    ['epaule', 'Epaule'], ['ceinture', 'Ceinture'], ['tourDeFesse', 'Tour de fesse'],
-    ['tourDuneCuisse', 'Tour d\'une cuisse'], ['tourDeGenou', 'Tour de genou'],
-    ['tourDeMollet', 'Tour de mollet'], ['longueurPantalon', 'Longueur pantalon'],
-    ['longueurDemiSaison', 'Longueur demi-saison'],
-  ];
-
-  const mesuresFemme = [
-    ['cou', 'Cou'], ['poitrine', 'Poitrine'], ['longueurMancheCourte', 'Longueur manche courte'],
-    ['longueurMancheLongue', 'Longueur manche longue'], ['tourDeManche', 'Tour de manche'],
-    ['tourDePoignet', 'Tour de poignet'], ['longueurBoubou', 'Longueur boubou'],
-    ['epaule', 'Epaule'], ['taille', 'Taille'], ['ceinture', 'Ceinture'],
-    ['tourDeFesse', 'Tour de fesse'], ['tourDuneCuisse', 'Tour d\'une cuisse'],
-    ['tourDeGenou', 'Tour de genou'], ['tourDeMollet', 'Tour de mollet'],
-    ['longueurPantalon', 'Longueur pantalon'], ['longueurHaut', 'Longueur haut'],
-    ['longueurMariniere', 'Longueur marinière'], ['longueurBoubou3Quart', 'Longueur boubou 3/4'],
-    ['longueurJupe', 'Longueur jupe'], ['longueurPagne', 'Longueur pagne'],
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -68,6 +47,7 @@ export default function Clients() {
               <tr>
                 <th className="text-left px-5 py-3 font-medium text-gray-600">Nom</th>
                 <th className="text-left px-5 py-3 font-medium text-gray-600">Téléphone</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-600">Email</th>
                 <th className="text-left px-5 py-3 font-medium text-gray-600">Sexe</th>
                 <th className="text-left px-5 py-3 font-medium text-gray-600">Depuis</th>
                 <th className="px-5 py-3" />
@@ -78,6 +58,7 @@ export default function Clients() {
                 <tr key={c._id} className="hover:bg-gray-50">
                   <td className="px-5 py-3 font-medium text-gray-800">{c.nom}</td>
                   <td className="px-5 py-3 text-gray-600">{c.telephone}</td>
+                  <td className="px-5 py-3 text-gray-600">{c.email}</td>
                   <td className="px-5 py-3">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${c.sexe === 'homme' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
                       {c.sexe}
@@ -107,23 +88,19 @@ export default function Clients() {
                 <div><label className="label">Téléphone</label><input {...register('telephone', { required: true })} className="input" /></div>
               </div>
               <div>
+                <label className="label">Email</label>
+                <input type="email" {...register('email', { required: true })} className="input" placeholder="client@email.com" />
+              </div>
+              <div>
+                <label className="label">Mot de passe</label>
+                <input type="password" {...register('password', { required: true, minLength: 6 })} className="input" placeholder="Minimum 6 caractères" />
+              </div>
+              <div>
                 <label className="label">Sexe</label>
                 <select {...register('sexe')} className="input">
                   <option value="femme">Femme</option>
                   <option value="homme">Homme</option>
                 </select>
-              </div>
-
-              <div className="pt-4 border-t">
-                <h3 className="font-semibold text-gray-700 mb-3">Mesures (en cm)</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {(sexe === 'homme' ? mesuresHomme : mesuresFemme).map(([name, label]) => (
-                    <div key={name}>
-                      <label className="label text-xs">{label}</label>
-                      <input type="number" {...register(`mesures${sexe === 'homme' ? 'Homme' : 'Femme'}.${name}`)} className="input text-sm" placeholder="cm" />
-                    </div>
-                  ))}
-                </div>
               </div>
 
               <div><label className="label">Notes</label><textarea {...register('notes')} rows={2} className="input resize-none" /></div>

@@ -6,17 +6,15 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
 export default function Commande() {
-  const { register, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
   const [files, setFiles]   = useState([]);
   const [sent, setSent]     = useState(false);
-  const sexe = watch('sexe');
 
   const onSubmit = async (data) => {
     try {
       const form = new FormData();
-      form.append('sexe', data.sexe);
       Object.entries(data).forEach(([k, v]) => {
-        if (k !== 'sexe') form.append(k, v);
+        form.append(k, v);
       });
       files.forEach(f => form.append('images', f));
       await api.post('/commandes/public', form, {
@@ -36,7 +34,7 @@ export default function Commande() {
         <div className="text-5xl mb-6">✅</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Commande reçue !</h2>
         <p className="text-gray-500 max-w-sm">
-          Nous allons vous contacter par WhatsApp ou téléphone pour confirmer les détails.
+          Nous allons vous contacter par WhatsApp ou téléphone pour confirmer les détails et prendre vos mesures.
         </p>
         <button onClick={() => setSent(false)} className="mt-6 text-rose-500 font-medium hover:underline">
           Passer une autre commande
@@ -51,11 +49,10 @@ export default function Commande() {
       <Navbar />
       <main className="flex-1 max-w-2xl mx-auto px-4 py-12 w-full">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Passer une commande</h1>
-        <p className="text-gray-500 mb-8">Remplissez le formulaire, nous vous recontactons rapidement.</p>
+        <p className="text-gray-500 mb-8">Remplissez le formulaire, nous vous recontactons rapidement pour prendre vos mesures.</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
 
-          {/* Infos client */}
           <section>
             <h2 className="font-semibold text-gray-700 mb-3 pb-2 border-b">Vos informations</h2>
             <div className="grid grid-cols-1 gap-4">
@@ -70,7 +67,6 @@ export default function Commande() {
             </div>
           </section>
 
-          {/* Détails commande */}
           <section>
             <h2 className="font-semibold text-gray-700 mb-3 pb-2 border-b">Détails du vêtement</h2>
             <div className="space-y-4">
@@ -98,64 +94,6 @@ export default function Commande() {
             </div>
           </section>
 
-          {/* Mesures */}
-          <section>
-            <h2 className="font-semibold text-gray-700 mb-3 pb-2 border-b">Vos mesures (en cm)</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {sexe === 'homme' && (
-                <>
-                  <div><label className="label">Cou</label><input type="number" {...register('cou')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Poitrine</label><input type="number" {...register('tourPoitrine')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur manche courte</label><input type="number" {...register('longueurMancheCourte')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur manche longue</label><input type="number" {...register('longueurMancheLongue')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de manche</label><input type="number" {...register('tourManche')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de poignet</label><input type="number" {...register('tourPoignet')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur boubou</label><input type="number" {...register('longueurBoubou')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Epaule</label><input type="number" {...register('epaules')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Ceinture</label><input type="number" {...register('ceinture')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de fesse</label><input type="number" {...register('tourFesse')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour d'une cuisse</label><input type="number" {...register('tourCuisse')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de genou</label><input type="number" {...register('tourGenou')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de mollet</label><input type="number" {...register('tourMollet')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur pantalon</label><input type="number" {...register('longueurPantalon')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur demi-saison</label><input type="number" {...register('longueurDemiSaison')} className="input" placeholder="cm" /></div>
-                </>
-              )}
-              {sexe === 'femme' && (
-                <>
-                  <div><label className="label">Cou</label><input type="number" {...register('cou')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Poitrine</label><input type="number" {...register('tourPoitrine')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur manche courte</label><input type="number" {...register('longueurMancheCourte')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur manche longue</label><input type="number" {...register('longueurMancheLongue')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de manche</label><input type="number" {...register('tourManche')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de poignet</label><input type="number" {...register('tourPoignet')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur boubou</label><input type="number" {...register('longueurBoubou')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Epaule</label><input type="number" {...register('epaules')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Taille</label><input type="number" {...register('tourTaille')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Ceinture</label><input type="number" {...register('ceinture')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de fesse</label><input type="number" {...register('tourFesse')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour d'une cuisse</label><input type="number" {...register('tourCuisse')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de genou</label><input type="number" {...register('tourGenou')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Tour de mollet</label><input type="number" {...register('tourMollet')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur pantalon</label><input type="number" {...register('longueurPantalon')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur haut</label><input type="number" {...register('longueurHaut')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur marinière</label><input type="number" {...register('longueurMariniere')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur boubou 3/4</label><input type="number" {...register('longueurBoubou3Quart')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur jupe</label><input type="number" {...register('longueurJupe')} className="input" placeholder="cm" /></div>
-                  <div><label className="label">Longueur pagne</label><input type="number" {...register('longueurPagne')} className="input" placeholder="cm" /></div>
-                </>
-              )}
-              {!sexe && (
-                <div className="col-span-2 text-center text-gray-400 py-4">Sélectionnez le sexe pour afficher les mesures</div>
-              )}
-              <div className="col-span-2">
-                <label className="label">Autres précisions</label>
-                <input {...register('autres')} className="input" placeholder="Ex: longueur robe jusqu'aux chevilles..." />
-              </div>
-            </div>
-          </section>
-
-          {/* Images */}
           <section>
             <h2 className="font-semibold text-gray-700 mb-3 pb-2 border-b">Photos d'inspiration (optionnel)</h2>
             <input
@@ -169,6 +107,11 @@ export default function Commande() {
               <p className="text-sm text-gray-500 mt-2">{files.length} fichier(s) sélectionné(s)</p>
             )}
           </section>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+            <p className="font-medium mb-1">📏 Prise des mesures</p>
+            <p>Nous vous contacterons pour prendre vos mesures professionnellement. Aucune mesure n'est requise pour le moment.</p>
+          </div>
 
           <button
             type="submit"

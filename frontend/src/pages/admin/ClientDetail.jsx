@@ -23,6 +23,7 @@ export default function ClientDetail() {
       reset({
         nom: r.data.nom,
         telephone: r.data.telephone,
+        email: r.data.email,
         sexe: r.data.sexe,
         notes: r.data.notes,
         ...r.data.mesuresHomme,
@@ -37,7 +38,7 @@ export default function ClientDetail() {
       const mesuresHomme = {};
       const mesuresFemme = {};
       Object.keys(data).forEach(key => {
-        if (key !== 'nom' && key !== 'telephone' && key !== 'sexe' && key !== 'notes') {
+        if (key !== 'nom' && key !== 'telephone' && key !== 'email' && key !== 'password' && key !== 'sexe' && key !== 'notes') {
           if (mesuresHomme[key] !== undefined) mesuresHomme[key] = data[key];
           else mesuresFemme[key] = data[key];
         }
@@ -45,6 +46,8 @@ export default function ClientDetail() {
       await api.put(`/clients/${id}`, {
         nom: data.nom,
         telephone: data.telephone,
+        email: data.email,
+        password: data.password || undefined,
         sexe: data.sexe,
         notes: data.notes,
         mesuresHomme: Object.keys(mesuresHomme).length ? mesuresHomme : undefined,
@@ -128,6 +131,10 @@ export default function ClientDetail() {
               <div><label className="label">Nom</label><input {...register('nom', { required: true })} className="input" /></div>
               <div><label className="label">Téléphone</label><input {...register('telephone', { required: true })} className="input" /></div>
             </div>
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div><label className="label">Email</label><input type="email" {...register('email', { required: true })} className="input" /></div>
+              <div><label className="label">Nouveau mot de passe</label><input type="password" {...register('password')} className="input" placeholder="Laisser vide pour ne pas changer" /></div>
+            </div>
             <div className="mb-4">
               <label className="label">Sexe</label>
               <select {...register('sexe')} className="input">
@@ -162,6 +169,7 @@ export default function ClientDetail() {
             <h1 className="text-2xl font-bold text-gray-800 mb-4">{client.nom}</h1>
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div><span className="text-gray-500">Téléphone :</span> <span className="font-medium ml-2">{client.telephone}</span></div>
+              <div><span className="text-gray-500">Email :</span> <span className="font-medium ml-2">{client.email}</span></div>
               <div><span className="text-gray-500">Sexe :</span> <span className="font-medium ml-2 capitalize">{client.sexe}</span></div>
               <div><span className="text-gray-500">Créé le :</span> <span className="font-medium ml-2">{new Date(client.createdAt).toLocaleDateString('fr-FR')}</span></div>
             </div>

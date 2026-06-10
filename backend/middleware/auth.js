@@ -17,4 +17,10 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { protect, adminOnly };
+const clientOnly = (req, res, next) => {
+  if (req.user.role !== 'client')
+    return res.status(403).json({ message: 'Accès réservé aux clients' });
+  next();
+};
+
+module.exports = { protect, adminOnly, clientOnly };

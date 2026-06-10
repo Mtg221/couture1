@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function PrivateRoute({ children, adminOnly = false }) {
+export default function PrivateRoute({ children, adminOnly = false, clientOnly = false }) {
   const { user, loading } = useAuth();
 
   if (loading) return (
@@ -10,8 +10,9 @@ export default function PrivateRoute({ children, adminOnly = false }) {
     </div>
   );
 
-  if (!user) return <Navigate to="/admin/login" replace />;
-  if (adminOnly && user.role !== 'admin') return <Navigate to="/admin" replace />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (adminOnly && user.role !== 'admin') return <Navigate to="/login" replace />;
+  if (clientOnly && user.role !== 'client') return <Navigate to="/login" replace />;
 
   return children;
 }
