@@ -54,7 +54,7 @@ router.post('/', adminOnly, async (req, res) => {
 
 router.put('/:id', adminOnly, async (req, res) => {
   try {
-    const { email, password, ...clientData } = req.body;
+    const { email, password, mesuresHomme, mesuresFemme, ...clientData } = req.body;
     
     const updateData = { ...clientData };
     
@@ -75,7 +75,11 @@ router.put('/:id', adminOnly, async (req, res) => {
       }
     }
     
-    const client = await Client.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-passwordHash');
+    const updateOps = { $set: updateData };
+    if (mesuresHomme) updateOps.$set['mesuresHomme'] = mesuresHomme;
+    if (mesuresFemme) updateOps.$set['mesuresFemme'] = mesuresFemme;
+    
+    const client = await Client.findByIdAndUpdate(req.params.id, updateOps, { new: true }).select('-passwordHash');
     res.json(client);
   } catch (err) {
     res.status(400).json({ message: err.message });
