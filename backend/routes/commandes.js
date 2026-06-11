@@ -3,6 +3,9 @@ const Commande = require('../models/Commande');
 const Client   = require('../models/Client');
 const upload   = require('../middleware/upload');
 const { protect, adminOnly, clientOnly } = require('../middleware/auth');
+const generateInvoicePDF = require('../utils/generateInvoice');
+const path = require('path');
+const fs = require('fs');
 
 router.post('/public', upload.array('images', 5), async (req, res) => {
   try {
@@ -102,6 +105,29 @@ router.put('/:id', adminOnly, upload.array('images', 5), async (req, res) => {
 router.delete('/:id', adminOnly, async (req, res) => {
   await Commande.findByIdAndDelete(req.params.id);
   res.json({ message: 'Commande supprimée' });
+});
+
+router.get('/:id/facture', adminOnly, async (req, res) => {
+  try {
+    const commande = await Commande.findById(req.params.id)
+      .populate('client', 'nom telephone');
+    if (!commande) return res.status(404).json({ message: 'Commande introuvable' });
+
+    const invoiceDir = path.join(__dirname, '..', 'invoices');
+    if (!fs.existsSync(invoiceDir)) fs.mkdirSync(invoiceDir, { recursive: true });
+    
+    const fileName = `facture_${commande._id}_${Date.now()}.pdf`;
+    const filePath = path.join(invoiceDir, fileName);
+    
+    await generateInvoicePDF(commande, filePath);
+    
+    res.download(filePath, fileName, (err) => {
+      if (err) console.error('Erreur téléchargement:', err);
+      setTimeout(() => fs.unlinkSync(filePath), 1000);
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;

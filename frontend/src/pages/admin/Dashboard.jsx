@@ -51,6 +51,7 @@ export default function Dashboard() {
             { to: '/admin/commandes', label: 'Commandes' },
             { to: '/admin/galerie',   label: 'Galerie' },
             { to: '/admin/messages',  label: 'Messages' },
+            { to: '/admin/rapports',  label: 'Rapports' },
           ].map(l => (
             <Link key={l.to} to={l.to}
               className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-colors">

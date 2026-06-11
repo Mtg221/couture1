@@ -38,6 +38,24 @@ export default function CommandeDetail() {
     } catch { toast.error('Erreur'); }
   };
 
+  const generatePDF = async () => {
+    try {
+      const response = await api.get(`/commandes/${id}/facture`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `facture_${id}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Facture téléchargée');
+    } catch {
+      toast.error('Erreur lors de la génération du PDF');
+    }
+  };
+
   if (!cmd) return <div className="p-8 text-gray-400">Chargement...</div>;
 
   const reste = cmd.prixTotal - cmd.avancePaye;
@@ -127,6 +145,20 @@ export default function CommandeDetail() {
                   Mettre à jour
                 </button>
               </form>
+            </div>
+
+            {/* Bouton Générer PDF */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <h2 className="font-bold text-gray-800 mb-3">Facture</h2>
+              <button
+                onClick={generatePDF}
+                className="w-full bg-blue-500 text-white py-2 rounded-xl text-sm font-medium hover:bg-blue-600 flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Générer la facture PDF
+              </button>
             </div>
 
             {/* Paiements (admin seulement) */}
