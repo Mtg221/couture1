@@ -3,28 +3,68 @@ const Paiement = require('../models/Paiement');
 const Commande = require('../models/Commande');
 const { protect, adminOnly } = require('../middleware/auth');
 
-router.use(protect, adminOnly);
+router.use(protect);
 
-router.get('/commande/:commandeId', async (req, res) => {
-  const paiements = await Paiement.find({ commande: req.params.commandeId }).sort({ createdAt: -1 });
+router.get('/', adminOnly, async (req, res) => {
+  const { clientId, commandeId } = req.query;
+  const query = {};
+  
+  if (clientId) query.client = clientId;
+  if (commandeId) query.commande = commandeId;
+  
+  const paiements = await Paiement.find(query)
+    .populate('commande', 'typeVetement')
+    .sort({ createdAt: -1 });
   res.json(paiements);
 });
 
-router.post('/', async (req, res) => {
+router.get('/commande/:commandeId', async (req, res) => {
+  const paiements = await Paiement.find({ commande: req.params.commandeId })
+    .populate('client', 'nom telephone')
+    .sort({ createdAt: -1 });
+  res.json(paiements);
+});
+
+router.get('/client/:clientId', async (req, res) => {
+  if (req.user.role === 'client' && req.params.clientId !== req.user.clientId) {
+    return res.status(403).json({ message: 'Accès non autorisé' });
+  }
+  
+  const paiements = await Paiement.find({ client: req.params.clientId })
+    .populate('commande', 'typeVetement statut')
+    .sort({ createdAt: -1 });
+  res.json(paiements);
+});
+
+router.post('/', adminOnly, async (req, res) => {
   try {
-    const paiement = await Paiement.create(req.body);
-    // Mettre à jour l'avance payée dans la commande
+    const { commande, montant, mode, note } = req.body;
+    
+    const commandeDoc = await Commande.findById(commande);
+    if (!commandeDoc) {
+      return res.status(404).json({ message: 'Commande introuvable' });
+    }
+    
+    const paiement = await Paiement.create({
+      commande,
+      client: commandeDoc.client,
+      montant,
+      mode,
+      note,
+    });
+    
     await Commande.findByIdAndUpdate(
-      req.body.commande,
-      { $inc: { avancePaye: req.body.montant } }
+      commande,
+      { $inc: { avancePaye: montant } }
     );
+    
     res.status(201).json(paiement);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminOnly, async (req, res) => {
   const paiement = await Paiement.findById(req.params.id);
   if (paiement) {
     await Commande.findByIdAndUpdate(

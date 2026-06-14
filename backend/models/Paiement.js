@@ -2,11 +2,12 @@ const mongoose = require('mongoose');
 
 const paiementSchema = new mongoose.Schema({
   commande: { type: mongoose.Schema.Types.ObjectId, ref: 'Commande', required: true },
+  client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
   montant:  { type: Number, required: true },
   mode: {
     type: String,
-    enum: ['cash', 'wave', 'orange_money', 'carte_bancaire'],
-    default: 'cash',
+    enum: ['especes', 'wave', 'orange_money', 'carte_bancaire', 'autre'],
+    default: 'especes',
   },
   note: String,
 }, { timestamps: true });

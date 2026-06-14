@@ -22,20 +22,12 @@ export default function Home() {
           Robes, costumes, boubous, tailleurs — sur mesure, avec soin,
           livrés dans les délais.
         </p>
-        <div className="flex gap-4 flex-wrap justify-center">
-          <Link
-            to="/commande"
-            className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-3 rounded-full font-medium transition-colors"
-          >
-            Passer une commande
-          </Link>
-          <Link
-            to="/galerie"
-            className="border border-gray-300 hover:border-rose-400 text-gray-700 px-8 py-3 rounded-full font-medium transition-colors"
-          >
-            Voir la galerie
-          </Link>
-        </div>
+        <Link
+          to="/galerie"
+          className="border border-gray-300 hover:border-rose-400 text-gray-700 px-8 py-3 rounded-full font-medium transition-colors"
+        >
+          Voir la galerie
+        </Link>
       </section>
 
       {/* Atouts */}

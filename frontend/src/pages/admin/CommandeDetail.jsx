@@ -248,37 +248,24 @@ export default function CommandeDetail() {
                 <h2 className="font-bold text-gray-800 mb-1">Paiements</h2>
                 <div className="flex justify-between text-sm mb-4">
                   <span className="text-gray-500">Total : <b>{cmd.prixTotal?.toLocaleString()} FCFA</b></span>
+                  <span className="text-gray-500">Payé : <b className="text-green-600">{cmd.avancePaye?.toLocaleString()} FCFA</b></span>
                   <span className="text-gray-500">Reste : <b className={reste > 0 ? 'text-red-500' : 'text-green-600'}>{reste?.toLocaleString()} FCFA</b></span>
                 </div>
 
                 <form onSubmit={hsPaie(addPaiement)} className="space-y-3 mb-4">
-                  <input {...regP('montant', { required: true })} type="number" className="input" placeholder="Montant (FCFA)" />
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="label text-xs">Type</label>
-                      <select 
-                        {...regP('typePaiement', { required: true })} 
-                        className="input text-sm"
-                        onChange={(e) => {
-                          const type = e.target.value;
-                          if (type === 'electronique') {
-                            setValue('mode', 'wave');
-                          } else {
-                            setValue('mode', 'cash');
-                          }
-                        }}
-                      >
-                        <option value="cash">Cash</option>
-                        <option value="electronique">Électronique</option>
-                      </select>
+                      <label className="label">Montant (FCFA)</label>
+                      <input {...regP('montant', { required: true })} type="number" className="input" placeholder="Montant" />
                     </div>
                     <div>
-                      <label className="label text-xs">Mode</label>
+                      <label className="label">Mode de paiement</label>
                       <select {...regP('mode', { required: true })} className="input text-sm">
-                        <option value="cash">Cash</option>
+                        <option value="especes">Espèces</option>
                         <option value="wave">Wave</option>
                         <option value="orange_money">Orange Money</option>
                         <option value="carte_bancaire">Carte bancaire</option>
+                        <option value="autre">Autre</option>
                       </select>
                     </div>
                   </div>
@@ -288,13 +275,49 @@ export default function CommandeDetail() {
                   </button>
                 </form>
 
-                <div className="space-y-2">
-                  {paies.map(p => (
-                    <div key={p._id} className="flex justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
-                      <span>{new Date(p.createdAt).toLocaleDateString('fr-FR')} · {p.mode}</span>
-                      <span className="font-semibold text-green-600">+{p.montant?.toLocaleString()} FCFA</span>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {paies.length === 0 ? (
+                    <p className="text-gray-400 text-sm text-center py-4">Aucun paiement enregistré</p>
+                  ) : (
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full text-xs">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="text-left px-3 py-2 font-medium text-gray-600">Date</th>
+                            <th className="text-left px-3 py-2 font-medium text-gray-600">Mode</th>
+                            <th className="text-right px-3 py-2 font-medium text-gray-600">Montant</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {paies.map(p => (
+                            <tr key={p._id} className="hover:bg-gray-50">
+                              <td className="px-3 py-2 text-gray-600">
+                                <div>{new Date(p.createdAt).toLocaleDateString('fr-FR')}</div>
+                                {p.note && <div className="text-xs text-gray-400">{p.note}</div>}
+                              </td>
+                              <td className="px-3 py-2">
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                  p.mode === 'wave' ? 'bg-blue-100 text-blue-700' :
+                                  p.mode === 'orange_money' ? 'bg-orange-100 text-orange-700' :
+                                  p.mode === 'carte_bancaire' ? 'bg-purple-100 text-purple-700' :
+                                  p.mode === 'autre' ? 'bg-gray-100 text-gray-600' :
+                                  'bg-green-100 text-green-700'
+                                }`}>
+                                  {p.mode === 'especes' ? 'Espèces' : 
+                                   p.mode === 'wave' ? 'Wave' :
+                                   p.mode === 'orange_money' ? 'Orange Money' :
+                                   p.mode === 'carte_bancaire' ? 'Carte' : 'Autre'}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-right font-semibold text-green-600">
+                                +{p.montant?.toLocaleString()} FCFA
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             )}

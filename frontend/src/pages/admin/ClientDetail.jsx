@@ -9,6 +9,7 @@ export default function ClientDetail() {
   const navigate = useNavigate();
   const [client, setClient] = useState(null);
   const [commandes, setCommandes] = useState([]);
+  const [paiements, setPaiements] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [showCommandeModal, setShowCommandeModal] = useState(false);
   const [vetements, setVetements] = useState([{ typeVetement: '', description: '', quantite: 1, photoModele: null, photoTissu: null }]);
@@ -37,6 +38,7 @@ export default function ClientDetail() {
       });
     });
     api.get(`/commandes/client/${id}`).then(r => setCommandes(r.data));
+    api.get(`/paiements?clientId=${id}`).then(r => setPaiements(r.data));
   };
 
   const updateClient = async (data) => {
@@ -363,6 +365,71 @@ export default function ClientDetail() {
           )}
         </div>
 
+        {/* Historique des paiements */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mt-6">
+          <h2 className="font-bold text-gray-800 mb-4">Historique des paiements</h2>
+          {paiements.length === 0 ? (
+            <p className="text-gray-400 text-sm">Aucun paiement enregistré</p>
+          ) : (
+            <div className="space-y-3">
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">Date</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">Commande</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">Mode</th>
+                      <th className="text-right px-4 py-3 font-medium text-gray-600">Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {paiements.map(p => (
+                      <tr key={p._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-gray-600">
+                          <div>{new Date(p.createdAt).toLocaleDateString('fr-FR')}</div>
+                          {p.note && <div className="text-xs text-gray-400">{p.note}</div>}
+                        </td>
+                        <td className="px-4 py-3">
+                          <a 
+                            href={`/admin/commandes/${p.commande?._id}`}
+                            className="text-rose-500 hover:underline text-xs font-medium"
+                          >
+                            {p.commande?.typeVetement || 'Commande'}
+                          </a>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            p.mode === 'wave' ? 'bg-blue-100 text-blue-700' :
+                            p.mode === 'orange_money' ? 'bg-orange-100 text-orange-700' :
+                            p.mode === 'carte_bancaire' ? 'bg-purple-100 text-purple-700' :
+                            p.mode === 'autre' ? 'bg-gray-100 text-gray-600' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {p.mode === 'especes' ? 'Espèces' : 
+                             p.mode === 'wave' ? 'Wave' :
+                             p.mode === 'orange_money' ? 'Orange Money' :
+                             p.mode === 'carte_bancaire' ? 'Carte' : 'Autre'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold text-green-600">
+                          {p.montant?.toLocaleString()} FCFA
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex justify-between items-center">
+                <span className="text-green-800 font-medium">Total payé par le client</span>
+                <span className="text-2xl font-bold text-green-700">
+                  {paiements.reduce((sum, p) => sum + (p.montant || 0), 0).toLocaleString()} FCFA
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {showCommandeModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl p-6 w-full max-w-4xl shadow-xl my-8">
@@ -509,8 +576,8 @@ export default function ClientDetail() {
             </form>
           </div>
         </div>
-      )}
-    </div>
+)}
+      </div>
     </div>
   );
 }
