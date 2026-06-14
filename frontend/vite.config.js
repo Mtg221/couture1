@@ -10,10 +10,6 @@ export default defineConfig({
     port: 5173,
   },
   build: {
-    rollupOptions: {
-      resolve: {
-        extensions: ['.jsx', '.js', '.tsx', '.ts']
-      }
-    }
+    rollupOptions: {}
   }
 })
