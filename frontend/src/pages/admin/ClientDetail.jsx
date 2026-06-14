@@ -286,10 +286,10 @@ export default function ClientDetail() {
                 </div>
               ))}
             </div>
-)}
-      </div>
+          )}
+        </div>
 
-      {showCommandeModal && (
+        {showCommandeModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-xl my-8">
             <h2 className="font-bold text-gray-800 mb-4">Nouvelle commande pour {client.nom}</h2>
