@@ -51,7 +51,9 @@ export default function Dashboard() {
             { to: '/admin/commandes', label: 'Commandes' },
             { to: '/admin/galerie',   label: 'Galerie' },
             { to: '/admin/messages',  label: 'Messages' },
+            { to: '/admin/employes',  label: 'Employés' },
             { to: '/admin/rapports',  label: 'Rapports' },
+            { to: '/admin/rapports-paiements',  label: 'Rapports Paiements' },
           ].map(l => (
             <Link key={l.to} to={l.to}
               className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-colors">
@@ -88,10 +90,13 @@ export default function Dashboard() {
                 className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
                 <div>
                   <p className="font-medium text-gray-800">{c.client?.nom || 'Client inconnu'}</p>
-                  <p className="text-sm text-gray-500">{c.typeVetement}</p>
+                  <p className="text-sm text-gray-500">
+                    {c.vetements?.[0]?.typeVetement || c.typeVetement || 'Commande'}
+                    {c.vetements && c.vetements.length > 1 && <span className="text-xs text-gray-400 ml-1">(+{c.vetements.length - 1})</span>}
+                  </p>
                 </div>
-                <span className={`text-xs px-3 py-1 rounded-full font-medium ${STATUT_COLORS[c.statut]}`}>
-                  {c.statut.replace('_', ' ')}
+                <span className={`text-xs px-3 py-1 rounded-full font-medium ${STATUT_COLORS[c.vetements?.[0]?.statut || c.statut]}`}>
+                  {(c.vetements?.[0]?.statut || c.statut || 'en_attente').replace('_', ' ')}
                 </span>
               </Link>
             ))}

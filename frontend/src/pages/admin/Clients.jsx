@@ -8,6 +8,7 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [search, setSearch]   = useState('');
   const [modal, setModal]     = useState(false);
+  const [createdPassword, setCreatedPassword] = useState('');
   const { register, handleSubmit, reset } = useForm();
 
   const load = () => api.get('/clients', { params: { search } }).then(r => setClients(r.data));
@@ -15,8 +16,9 @@ export default function Clients() {
 
   const onCreate = async (data) => {
     try {
+      setCreatedPassword(data.password);
       await api.post('/clients', data);
-      toast.success('Client ajouté');
+      toast.success('Client créé avec succès');
       setModal(false); reset(); load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Erreur');
@@ -100,6 +102,7 @@ export default function Clients() {
               <div>
                 <label className="label">Mot de passe</label>
                 <input type="password" {...register('password', { required: true, minLength: 6 })} className="input" placeholder="Minimum 6 caractères" />
+                <p className="text-xs text-gray-500 mt-1">À communiquer au client oralement</p>
               </div>
               <div>
                 <label className="label">Sexe</label>
@@ -112,7 +115,7 @@ export default function Clients() {
               <div><label className="label">Notes</label><textarea {...register('notes')} rows={2} className="input resize-none" /></div>
 
               <div className="flex gap-3 pt-2 sticky bottom-0 bg-white">
-                <button type="button" onClick={() => setModal(false)}
+                <button type="button" onClick={() => { setModal(false); setCreatedPassword(''); reset(); }}
                   className="flex-1 border border-gray-200 rounded-xl py-2 text-sm text-gray-600 hover:bg-gray-50">
                   Annuler
                 </button>

@@ -9,7 +9,6 @@ export default function Navbar() {
   const links = [
     { to: '/',         label: 'Accueil' },
     { to: '/galerie',  label: 'Galerie' },
-    { to: '/commande', label: 'Commander' },
     { to: '/contact',  label: 'Contact' },
     { to: '/login', label: 'Connexion', auth: true },
   ];

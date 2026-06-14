@@ -8,7 +8,6 @@ import WhatsAppButton from './components/WhatsAppButton';
 import Home     from './pages/public/Home';
 import Galerie  from './pages/public/Galerie';
 import Contact  from './pages/public/Contact';
-import Commande from './pages/public/Commande';
 import Login    from './pages/Login';
 
 // Admin
@@ -20,6 +19,8 @@ import CommandeDetail  from './pages/admin/CommandeDetail';
 import GalerieAdmin    from './pages/admin/GalerieAdmin';
 import Messages        from './pages/admin/Messages';
 import Rapports        from './pages/admin/Rapports';
+import Employes        from './pages/admin/Employes';
+import RapportsPaiements from './pages/admin/RapportsPaiements';
 
 // Client
 import ClientDashboard from './pages/client/Dashboard';
@@ -36,7 +37,6 @@ export default function App() {
           <Route path="/"         element={<Home />} />
           <Route path="/galerie"  element={<Galerie />} />
           <Route path="/contact"  element={<Contact />} />
-          <Route path="/commande" element={<Commande />} />
           <Route path="/login"    element={<Login />} />
 
           {/* Admin */}
@@ -48,6 +48,8 @@ export default function App() {
           <Route path="/admin/galerie"            element={<PrivateRoute adminOnly><GalerieAdmin /></PrivateRoute>} />
           <Route path="/admin/messages"           element={<PrivateRoute><Messages /></PrivateRoute>} />
           <Route path="/admin/rapports"           element={<PrivateRoute adminOnly><Rapports /></PrivateRoute>} />
+          <Route path="/admin/employes"           element={<PrivateRoute adminOnly><Employes /></PrivateRoute>} />
+          <Route path="/admin/rapports-paiements" element={<PrivateRoute adminOnly><RapportsPaiements /></PrivateRoute>} />
 
           {/* Client */}
           <Route path="/client/dashboard" element={<PrivateRoute><ClientDashboard /></PrivateRoute>} />

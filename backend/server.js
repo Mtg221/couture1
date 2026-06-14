@@ -31,6 +31,8 @@ app.use('/api/auth',      require('./routes/auth'));
 app.use('/api/clients',   require('./routes/clients'));
 app.use('/api/commandes', require('./routes/commandes'));
 app.use('/api/paiements', require('./routes/paiements'));
+app.use('/api/employes',  require('./routes/employes'));
+app.use('/api/rapports',  require('./routes/rapports'));
 app.use('/api/galerie',   require('./routes/galerie'));
 app.use('/api/messages',  require('./routes/messages'));
 app.use('/api/dashboard', require('./routes/dashboard'));

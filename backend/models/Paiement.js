@@ -5,8 +5,8 @@ const paiementSchema = new mongoose.Schema({
   montant:  { type: Number, required: true },
   mode: {
     type: String,
-    enum: ['especes', 'wave', 'orange_money', 'autre'],
-    default: 'especes',
+    enum: ['cash', 'wave', 'orange_money', 'carte_bancaire'],
+    default: 'cash',
   },
   note: String,
 }, { timestamps: true });

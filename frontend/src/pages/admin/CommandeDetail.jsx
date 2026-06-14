@@ -253,11 +253,35 @@ export default function CommandeDetail() {
 
                 <form onSubmit={hsPaie(addPaiement)} className="space-y-3 mb-4">
                   <input {...regP('montant', { required: true })} type="number" className="input" placeholder="Montant (FCFA)" />
-                  <select {...regP('mode')} className="input">
-                    {['especes', 'wave', 'orange_money', 'autre'].map(m => (
-                      <option key={m} value={m}>{m.replace('_', ' ')}</option>
-                    ))}
-                  </select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="label text-xs">Type</label>
+                      <select 
+                        {...regP('typePaiement', { required: true })} 
+                        className="input text-sm"
+                        onChange={(e) => {
+                          const type = e.target.value;
+                          if (type === 'electronique') {
+                            setValue('mode', 'wave');
+                          } else {
+                            setValue('mode', 'cash');
+                          }
+                        }}
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="electronique">Électronique</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="label text-xs">Mode</label>
+                      <select {...regP('mode', { required: true })} className="input text-sm">
+                        <option value="cash">Cash</option>
+                        <option value="wave">Wave</option>
+                        <option value="orange_money">Orange Money</option>
+                        <option value="carte_bancaire">Carte bancaire</option>
+                      </select>
+                    </div>
+                  </div>
                   <input {...regP('note')} className="input" placeholder="Note (optionnel)" />
                   <button type="submit" className="w-full bg-green-500 text-white py-2 rounded-xl text-sm font-medium hover:bg-green-600">
                     Enregistrer paiement
