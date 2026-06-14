@@ -13,11 +13,20 @@ export default function CommandeDetail() {
   const navigate         = useNavigate();
   const [cmd, setCmd]    = useState(null);
   const [paies, setPaies] = useState([]);
-  const { register, handleSubmit: hsStatut } = useForm();
+  const [vetementIndex, setVetementIndex] = useState(0);
+  const { register, handleSubmit: hsStatut, setValue } = useForm();
   const { register: regP, handleSubmit: hsPaie, reset: resetP } = useForm();
 
   const load = () => {
-    api.get(`/commandes/${id}`).then(r => setCmd(r.data));
+    api.get(`/commandes/${id}`).then(r => {
+      const data = r.data;
+      if (data.vetements && data.vetements.length > 0) {
+        setValue('statut', data.vetements[0].statut || 'en_attente');
+      } else {
+        setValue('statut', data.statut || 'en_attente');
+      }
+      setCmd(data);
+    });
     if (user?.role === 'admin')
       api.get(`/paiements/commande/${id}`).then(r => setPaies(r.data));
   };
@@ -26,9 +35,27 @@ export default function CommandeDetail() {
 
   const updateStatut = async (data) => {
     try {
-      await api.put(`/commandes/${id}`, data);
-      toast.success('Statut mis à jour'); load();
-    } catch { toast.error('Erreur'); }
+      const vetement = cmd.vetements?.[vetementIndex];
+      if (vetement) {
+        const newVetements = [...cmd.vetements];
+        newVetements[vetementIndex] = {
+          ...vetement,
+          statut: data.statut,
+        };
+        await api.put(`/commandes/${id}`, {
+          vetements: JSON.stringify(newVetements),
+          statutIndex: vetementIndex,
+          statut: data.statut,
+          note: data.note,
+        });
+      } else {
+        await api.put(`/commandes/${id}`, { ...data });
+      }
+      toast.success('Statut mis à jour'); 
+      load();
+    } catch { 
+      toast.error('Erreur'); 
+    }
   };
 
   const addPaiement = async (data) => {
@@ -59,10 +86,34 @@ export default function CommandeDetail() {
   if (!cmd) return <div className="p-8 text-gray-400">Chargement...</div>;
 
   const reste = cmd.prixTotal - cmd.avancePaye;
+  const vetements = cmd.vetements || (cmd.typeVetement ? [{
+    typeVetement: cmd.typeVetement,
+    description: cmd.description,
+    quantite: 1,
+    photoModele: cmd.images?.[0],
+    photoTissu: cmd.images?.[1],
+    mesures: cmd.mesures,
+    statut: cmd.statut,
+  }] : []);
+
+  const labelsMesures = {
+    cou: 'Cou', tourPoitrine: 'Poitrine', longueurMancheCourte: 'Longueur manche courte',
+    longueurMancheLongue: 'Longueur manche longue', tourManche: 'Tour de manche',
+    tourPoignet: 'Tour de poignet', longueurBoubou: 'Longueur boubou',
+    epaule: 'Epaule', ceinture: 'Ceinture', tourFesse: 'Tour de fesse',
+    tourCuisse: 'Tour de cuisse', tourGenou: 'Tour de genou', tourMollet: 'Tour de mollet',
+    longueurPantalon: 'Longueur pantalon', longueurDemiSaison: 'Longueur demi-saison',
+    tourTaille: 'Taille', longueurHaut: 'Longueur haut', longueurMariniere: 'Longueur marinière',
+    longueurBoubou3Quart: 'Longueur boubou 3/4', longueurJupe: 'Longueur jupe',
+    longueurPagne: 'Longueur pagne', autres: 'Autres',
+    hauteurTotal: 'Hauteur totale', hauteurDos: 'Hauteur du dos',
+    longueurBras: 'Longueur des bras', tourBras: 'Tour de bras', tourHanches: 'Tour de hanches',
+    epaules: 'Epaules', tourDeFesse: 'Tour de fesse', tourDuneCuisse: 'Tour d\'une cuisse',
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-800 mb-6 flex items-center gap-1">
           ← Retour
         </button>
@@ -70,60 +121,90 @@ export default function CommandeDetail() {
         <div className="grid md:grid-cols-2 gap-6">
           {/* Infos commande */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 className="font-bold text-gray-800 mb-4">Détails</h2>
+            <h2 className="font-bold text-gray-800 mb-4">Détails de la commande</h2>
             <div className="space-y-3 text-sm">
               <div><span className="text-gray-500">Client :</span> <span className="font-medium ml-2">{cmd.client?.nom}</span></div>
               <div><span className="text-gray-500">Téléphone :</span> <span className="font-medium ml-2">{cmd.client?.telephone}</span></div>
-              <div><span className="text-gray-500">Sexe :</span> <span className="font-medium ml-2 capitalize">{cmd.sexe || 'N/A'}</span></div>
-              <div><span className="text-gray-500">Vêtement :</span> <span className="font-medium ml-2">{cmd.typeVetement}</span></div>
-              <div><span className="text-gray-500">Description :</span> <p className="mt-1 text-gray-700">{cmd.description}</p></div>
               {cmd.dateLivraison && (
                 <div><span className="text-gray-500">Livraison prévue :</span> <span className="font-medium ml-2">{new Date(cmd.dateLivraison).toLocaleDateString('fr-FR')}</span></div>
               )}
             </div>
 
-            {/* Mesures */}
-{cmd.mesures && (
-                <div className="mt-4 pt-4 border-t">
-                  <h3 className="font-semibold text-gray-700 mb-3 text-sm">Mesures (cm)</h3>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                    {Object.entries(cmd.mesures)
-                      .filter(([k, v]) => v && k !== 'autres')
-                      .map(([k, v]) => {
-                      const labels = {
-                        cou: 'Cou', tourPoitrine: 'Poitrine', longueurMancheCourte: 'Longueur manche courte',
-                        longueurMancheLongue: 'Longueur manche longue', tourManche: 'Tour de manche',
-                        tourPoignet: 'Tour de poignet', longueurBoubou: 'Longueur boubou',
-                        epaules: 'Epaule', ceinture: 'Ceinture', tourFesse: 'Tour de fesse',
-                        tourCuisse: 'Tour de cuisse', tourGenou: 'Tour de genou', tourMollet: 'Tour de mollet',
-                        longueurPantalon: 'Longueur pantalon', longueurDemiSaison: 'Longueur demi-saison',
-                        tourTaille: 'Taille', longueurHaut: 'Longueur haut', longueurMariniere: 'Longueur marinière',
-                        longueurBoubou3Quart: 'Longueur boubou 3/4', longueurJupe: 'Longueur jupe',
-                        longueurPagne: 'Longueur pagne', autres: 'Autres',
-                        hauteurTotal: 'Hauteur totale', hauteurDos: 'Hauteur du dos',
-                        longueurBras: 'Longueur des bras', tourBras: 'Tour de bras', tourHanches: 'Tour de hanches',
-                      };
-                      return (
-                        <div key={k} className="flex justify-between">
-                          <span className="text-gray-400">{labels[k] || k} :</span>
-                          <span className="font-medium">{v}</span>
-                        </div>
-                      );
-                    })}
-                </div>
+            {cmd.description && (
+              <div className="mt-4 pt-4 border-t">
+                <h3 className="font-semibold text-gray-700 mb-2 text-sm">Description globale</h3>
+                <p className="text-gray-700 text-sm">{cmd.description}</p>
               </div>
             )}
 
-            {/* Images */}
-            {cmd.images?.length > 0 && (
+            {/* Liste des vêtements */}
+            <div className="mt-4 pt-4 border-t">
+              <h3 className="font-semibold text-gray-700 mb-3 text-sm">Vêtements ({vetements.length})</h3>
+              <div className="space-y-3">
+                {vetements.map((v, idx) => (
+                  <div key={idx} className={`rounded-xl border p-3 ${vetementIndex === idx ? 'border-rose-300 bg-rose-50' : 'border-gray-200 bg-gray-50'}`}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-medium text-gray-800">{v.typeVetement}</p>
+                        {v.quantite && v.quantite > 1 && (
+                          <p className="text-xs text-gray-500">Quantité : {v.quantite}</p>
+                        )}
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        v.statut === 'prete' ? 'bg-green-100 text-green-700' :
+                        v.statut === 'livree' ? 'bg-gray-100 text-gray-600' :
+                        v.statut === 'refusee' ? 'bg-red-100 text-red-600' :
+                        v.statut === 'en_cours' ? 'bg-blue-100 text-blue-700' :
+                        'bg-amber-100 text-amber-700'
+                      }`}>
+                        {v.statut?.replace('_', ' ')}
+                      </span>
+                    </div>
+                    
+                    {v.description && <p className="text-xs text-gray-600 mb-2">{v.description}</p>}
+                    
+                    {(v.photoModele || v.photoTissu) && (
+                      <div className="flex gap-2 mt-2">
+                        {v.photoModele && (
+                          <a href={v.photoModele} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500">
+                            <img src={v.photoModele} className="w-12 h-12 object-cover rounded border" alt="Modèle" title="Photo modèle" />
+                          </a>
+                        )}
+                        {v.photoTissu && (
+                          <a href={v.photoTissu} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500">
+                            <img src={v.photoTissu} className="w-12 h-12 object-cover rounded border" alt="Tissu" title="Photo tissu" />
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    
+                    <button 
+                      onClick={() => {
+                        setVetementIndex(idx);
+                        setValue('statut', v.statut || 'en_attente');
+                      }}
+                      className={`text-xs mt-2 px-2 py-1 rounded ${vetementIndex === idx ? 'bg-rose-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+                    >
+                      {vetementIndex === idx ? '✓ Sélectionné' : 'Sélectionner'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mesures du vêtement sélectionné */}
+            {vetements[vetementIndex]?.mesures && Object.keys(vetements[vetementIndex].mesures).filter(k => vetements[vetementIndex].mesures[k]).length > 0 && (
               <div className="mt-4 pt-4 border-t">
-                <h3 className="font-semibold text-gray-700 mb-3 text-sm">Photos</h3>
-                <div className="flex gap-2 flex-wrap">
-                  {cmd.images.map((img, i) => (
-                    <a key={i} href={img} target="_blank" rel="noopener noreferrer">
-                      <img src={img} className="w-16 h-16 object-cover rounded-lg border" alt="" />
-                    </a>
-                  ))}
+                <h3 className="font-semibold text-gray-700 mb-3 text-sm">Mesures - {vetements[vetementIndex].typeVetement}</h3>
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  {Object.entries(vetements[vetementIndex].mesures)
+                    .filter(([k, v]) => v && k !== 'autres')
+                    .map(([k, v]) => (
+                      <div key={k} className="flex justify-between">
+                        <span className="text-gray-400">{labelsMesures[k] || k} :</span>
+                        <span className="font-medium">{v} cm</span>
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
@@ -133,16 +214,16 @@ export default function CommandeDetail() {
           <div className="space-y-6">
             {/* Changer statut */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-              <h2 className="font-bold text-gray-800 mb-4">Statut</h2>
+              <h2 className="font-bold text-gray-800 mb-4">
+                Statut {vetementIndex !== undefined && vetements[vetementIndex] ? `- ${vetements[vetementIndex].typeVetement}` : ''}
+              </h2>
               <form onSubmit={hsStatut(updateStatut)} className="space-y-3">
-                <select {...register('statut')} defaultValue={cmd.statut} className="input">
+                <select {...register('statut')} className="input">
                   {STATUTS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
                 </select>
-                <input {...register('prixTotal')} type="number" defaultValue={cmd.prixTotal} className="input" placeholder="Prix total (FCFA)" />
-                <input {...register('dateLivraison')} type="date" defaultValue={cmd.dateLivraison?.slice(0, 10)} className="input" />
                 <input {...register('note')} className="input" placeholder="Note (optionnel)" />
                 <button type="submit" className="w-full bg-rose-500 text-white py-2 rounded-xl text-sm font-medium hover:bg-rose-600">
-                  Mettre à jour
+                  Mettre à jour le statut
                 </button>
               </form>
             </div>

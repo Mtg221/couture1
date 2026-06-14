@@ -7,19 +7,38 @@ const generateInvoicePDF = require('../utils/generateInvoice');
 const path = require('path');
 const fs = require('fs');
 
-router.post('/public', upload.array('images', 5), async (req, res) => {
+router.post('/public', upload.fields([
+  { name: 'photoModele_0', maxCount: 1 },
+  { name: 'photoTissu_0', maxCount: 1 },
+]), async (req, res) => {
   try {
-    const { nom, telephone, typeVetement, description, ...mesures } = req.body;
+    const { nom, telephone, description, sexe, dateLivraison, prixTotal, avancePaye } = req.body;
+    const vetements = JSON.parse(req.body.vetements || '[]');
+    
     let client = await Client.findOne({ telephone });
-    if (!client) client = await Client.create({ nom, telephone, email: `${telephone}@temp.com`, passwordHash: 'temp123' });
+    if (!client) {
+      client = await Client.create({ 
+        nom, 
+        telephone, 
+        email: `${telephone}@temp.com`, 
+        passwordHash: 'temp123' 
+      });
+    }
 
-    const images = req.files?.map(f => f.path) || [];
+    const photos = req.files || {};
+    vetements.forEach((v, idx) => {
+      if (photos[`photoModele_${idx}`]) v.photoModele = photos[`photoModele_${idx}`][0].path;
+      if (photos[`photoTissu_${idx}`]) v.photoTissu = photos[`photoTissu_${idx}`][0].path;
+    });
+
     const commande = await Commande.create({
       client: client._id,
-      typeVetement,
       description,
-      mesures,
-      images,
+      sexe: sexe || 'homme',
+      vetements,
+      prixTotal: Number(prixTotal) || 0,
+      avancePaye: Number(avancePaye) || 0,
+      dateLivraison: dateLivraison || null,
       sourceCommande: 'public',
     });
     res.status(201).json({ message: 'Commande reçue', id: commande._id });
@@ -69,32 +88,121 @@ router.get('/client/:clientId', async (req, res) => {
   res.json(commandes);
 });
 
-router.post('/', protect, upload.array('images', 5), async (req, res) => {
+router.post('/', protect, upload.fields([
+  { name: 'photoModele_0', maxCount: 1 },
+  { name: 'photoTissu_0', maxCount: 1 },
+  { name: 'photoModele_1', maxCount: 1 },
+  { name: 'photoTissu_1', maxCount: 1 },
+  { name: 'photoModele_2', maxCount: 1 },
+  { name: 'photoTissu_2', maxCount: 1 },
+  { name: 'photoModele_3', maxCount: 1 },
+  { name: 'photoTissu_3', maxCount: 1 },
+  { name: 'photoModele_4', maxCount: 1 },
+  { name: 'photoTissu_4', maxCount: 1 },
+  { name: 'photoModele_5', maxCount: 1 },
+  { name: 'photoTissu_5', maxCount: 1 },
+  { name: 'photoModele_6', maxCount: 1 },
+  { name: 'photoTissu_6', maxCount: 1 },
+  { name: 'photoModele_7', maxCount: 1 },
+  { name: 'photoTissu_7', maxCount: 1 },
+  { name: 'photoModele_8', maxCount: 1 },
+  { name: 'photoTissu_8', maxCount: 1 },
+  { name: 'photoModele_9', maxCount: 1 },
+  { name: 'photoTissu_9', maxCount: 1 },
+]), async (req, res) => {
   try {
     if (req.user.role === 'client') {
       req.body.client = req.user.clientId;
     }
     
-    const images = req.files?.map(f => f.path) || [];
-    const commande = await Commande.create({ ...req.body, images });
+    const { description, sexe, dateLivraison, prixTotal, avancePaye } = req.body;
+    const vetements = JSON.parse(req.body.vetements || '[]');
+    
+    const photos = req.files || {};
+    vetements.forEach((v, idx) => {
+      if (photos[`photoModele_${idx}`]) v.photoModele = photos[`photoModele_${idx}`][0].path;
+      if (photos[`photoTissu_${idx}`]) v.photoTissu = photos[`photoTissu_${idx}`][0].path;
+    });
+
+    const commande = await Commande.create({
+      client: req.body.client,
+      description,
+      sexe: sexe || 'homme',
+      vetements,
+      prixTotal: Number(prixTotal) || 0,
+      avancePaye: Number(avancePaye) || 0,
+      dateLivraison: dateLivraison || null,
+    });
     res.status(201).json(commande);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-router.put('/:id', adminOnly, upload.array('images', 5), async (req, res) => {
+router.put('/:id', adminOnly, upload.fields([
+  { name: 'photoModele_0', maxCount: 1 },
+  { name: 'photoTissu_0', maxCount: 1 },
+  { name: 'photoModele_1', maxCount: 1 },
+  { name: 'photoTissu_1', maxCount: 1 },
+  { name: 'photoModele_2', maxCount: 1 },
+  { name: 'photoTissu_2', maxCount: 1 },
+  { name: 'photoModele_3', maxCount: 1 },
+  { name: 'photoTissu_3', maxCount: 1 },
+  { name: 'photoModele_4', maxCount: 1 },
+  { name: 'photoTissu_4', maxCount: 1 },
+  { name: 'photoModele_5', maxCount: 1 },
+  { name: 'photoTissu_5', maxCount: 1 },
+  { name: 'photoModele_6', maxCount: 1 },
+  { name: 'photoTissu_6', maxCount: 1 },
+  { name: 'photoModele_7', maxCount: 1 },
+  { name: 'photoTissu_7', maxCount: 1 },
+  { name: 'photoModele_8', maxCount: 1 },
+  { name: 'photoTissu_8', maxCount: 1 },
+  { name: 'photoModele_9', maxCount: 1 },
+  { name: 'photoTissu_9', maxCount: 1 },
+]), async (req, res) => {
   try {
     const commande = await Commande.findById(req.params.id);
     if (!commande) return res.status(404).json({ message: 'Introuvable' });
 
-    if (req.body.statut && req.body.statut !== commande.statut) {
-      commande.historiqueStatut.push({ statut: req.body.statut, note: req.body.note });
-      commande.statut = req.body.statut;
+    const { description, sexe, dateLivraison, prixTotal, avancePaye, vetements, note } = req.body;
+    
+    if (description) commande.description = description;
+    if (sexe) commande.sexe = sexe;
+    if (dateLivraison) commande.dateLivraison = dateLivraison;
+    if (prixTotal !== undefined) commande.prixTotal = Number(prixTotal);
+    if (avancePaye !== undefined) commande.avancePaye = Number(avancePaye);
+    
+    if (vetements) {
+      const newVetements = JSON.parse(vetements);
+      const photos = req.files || {};
+      
+      newVetements.forEach((v, idx) => {
+        if (photos[`photoModele_${idx}`]) {
+          v.photoModele = photos[`photoModele_${idx}`][0].path;
+        } else if (commande.vetements[idx]) {
+          v.photoModele = commande.vetements[idx].photoModele;
+        }
+        if (photos[`photoTissu_${idx}`]) {
+          v.photoTissu = photos[`photoTissu_${idx}`][0].path;
+        } else if (commande.vetements[idx]) {
+          v.photoTissu = commande.vetements[idx].photoTissu;
+        }
+      });
+      
+      commande.vetements = newVetements;
     }
-    const newImages = req.files?.map(f => f.path) || [];
-    Object.assign(commande, req.body);
-    if (newImages.length) commande.images = [...commande.images, ...newImages];
+
+    if (note) {
+      const lastVetementIndex = commande.vetements.length - 1;
+      if (lastVetementIndex >= 0 && req.body.statutIndex !== undefined) {
+        const idx = Number(req.body.statutIndex);
+        if (commande.vetements[idx] && req.body.statut) {
+          commande.vetements[idx].statut = req.body.statut;
+        }
+      }
+    }
+
     await commande.save();
     res.json(commande);
   } catch (err) {

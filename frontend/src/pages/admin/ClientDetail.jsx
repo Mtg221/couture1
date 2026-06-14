@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
 
@@ -11,8 +11,13 @@ export default function ClientDetail() {
   const [commandes, setCommandes] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [showCommandeModal, setShowCommandeModal] = useState(false);
-  const { register, handleSubmit, reset, watch } = useForm();
+  const [vetements, setVetements] = useState([{ typeVetement: '', description: '', quantite: 1, photoModele: null, photoTissu: null }]);
+  const { register, handleSubmit, reset, watch, setValue } = useForm();
   const sexe = watch('sexe');
+  const descriptionGlobale = watch('descriptionGlobale');
+  const dateLivraison = watch('dateLivraison');
+  const prixTotal = watch('prixTotal');
+  const avancePaye = watch('avancePaye');
 
   useEffect(() => {
     load();
@@ -90,27 +95,96 @@ export default function ClientDetail() {
     }
   };
 
+  const addVetement = () => {
+    setVetements([...vetements, { typeVetement: '', description: '', quantite: 1, photoModele: null, photoTissu: null }]);
+  };
+
+  const removeVetement = (index) => {
+    if (vetements.length === 1) {
+      toast.error('Il faut au moins un vêtement');
+      return;
+    }
+    const newVetements = vetements.filter((_, i) => i !== index);
+    setVetements(newVetements);
+  };
+
+  const updateVetement = (index, field, value) => {
+    const newVetements = [...vetements];
+    newVetements[index][field] = value;
+    setVetements(newVetements);
+  };
+
   const createCommande = async (data) => {
     try {
-      const images = data.images?.[0] ? Array.from(data.images) : [];
+      const vetementsValides = vetements.filter(v => v.typeVetement.trim() !== '');
+      if (vetementsValides.length === 0) {
+        toast.error('Ajoutez au moins un vêtement');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('client', id);
-      formData.append('typeVetement', data.typeVetement);
-      formData.append('description', data.description);
+      formData.append('description', descriptionGlobale || '');
       formData.append('sexe', client.sexe);
-      
-      if (data.prixTotal) formData.append('prixTotal', Number(data.prixTotal));
-      if (data.dateLivraison) formData.append('dateLivraison', data.dateLivraison);
-      
-      images.forEach(file => {
-        formData.append('images', file);
+      if (prixTotal) formData.append('prixTotal', Number(prixTotal));
+      if (dateLivraison) formData.append('dateLivraison', dateLivraison);
+
+      vetementsValides.forEach((v, idx) => {
+        const vetementData = {
+          typeVetement: v.typeVetement,
+          description: v.description || '',
+          quantite: Number(v.quantite) || 1,
+          mesures: {},
+        };
+
+        const hommeKeys = ['cou', 'poitrine', 'longueurMancheCourte', 'longueurMancheLongue', 'tourDeManche', 'tourDePoignet', 'longueurBoubou', 'epaule', 'ceinture', 'tourDeFesse', 'tourDuneCuisse', 'tourDeGenou', 'tourDeMollet', 'longueurPantalon', 'longueurDemiSaison'];
+        const femmeKeys = ['cou', 'poitrine', 'longueurMancheCourte', 'longueurMancheLongue', 'tourDeManche', 'tourDePoignet', 'longueurBoubou', 'epaule', 'taille', 'ceinture', 'tourDeFesse', 'tourDuneCuisse', 'tourDeGenou', 'tourDeMollet', 'longueurPantalon', 'longueurHaut', 'longueurMariniere', 'longueurBoubou3Quart', 'longueurJupe', 'longueurPagne'];
+
+        Object.keys(data).forEach(key => {
+          if (hommeKeys.includes(key) || femmeKeys.includes(key)) {
+            if (data[key]) vetementData.mesures[key] = Number(data[key]);
+          }
+        });
+
+        formData.append(`vetements`, JSON.stringify(vetementData));
+
+        if (v.photoModele) {
+          formData.append(`photoModele_${idx}`, v.photoModele);
+        }
+        if (v.photoTissu) {
+          formData.append(`photoTissu_${idx}`, v.photoTissu);
+        }
       });
+
+      const vetementsJson = vetementsValides.map(v => {
+        const vetementData = {
+          typeVetement: v.typeVetement,
+          description: v.description || '',
+          quantite: Number(v.quantite) || 1,
+          mesures: {},
+        };
+
+        const hommeKeys = ['cou', 'poitrine', 'longueurMancheCourte', 'longueurMancheLongue', 'tourDeManche', 'tourDePoignet', 'longueurBoubou', 'epaule', 'ceinture', 'tourDeFesse', 'tourDuneCuisse', 'tourDeGenou', 'tourDeMollet', 'longueurPantalon', 'longueurDemiSaison'];
+        const femmeKeys = ['cou', 'poitrine', 'longueurMancheCourte', 'longueurMancheLongue', 'tourDeManche', 'tourDePoignet', 'longueurBoubou', 'epaule', 'taille', 'ceinture', 'tourDeFesse', 'tourDuneCuisse', 'tourDeGenou', 'tourDeMollet', 'longueurPantalon', 'longueurHaut', 'longueurMariniere', 'longueurBoubou3Quart', 'longueurJupe', 'longueurPagne'];
+
+        Object.keys(data).forEach(key => {
+          if (hommeKeys.includes(key) || femmeKeys.includes(key)) {
+            if (data[key]) vetementData.mesures[key] = Number(data[key]);
+          }
+        });
+
+        return vetementData;
+      });
+
+      formData.set('vetements', JSON.stringify(vetementsJson));
 
       await api.post('/commandes', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Commande créée');
       setShowCommandeModal(false);
+      setVetements([{ typeVetement: '', description: '', quantite: 1, photoModele: null, photoTissu: null }]);
+      reset({ descriptionGlobale: '', prixTotal: '', avancePaye: '', dateLivraison: '' });
       load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Erreur lors de la création');
@@ -260,7 +334,7 @@ export default function ClientDetail() {
               {commandes.map(cmd => (
                 <div key={cmd._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                   <div className="flex-1">
-                    <p className="font-medium text-gray-800">{cmd.typeVetement}</p>
+                    <p className="font-medium text-gray-800">{cmd.vetements?.[0]?.typeVetement || cmd.typeVetement || 'Commande'}</p>
                     <p className="text-xs text-gray-500">{new Date(cmd.createdAt).toLocaleDateString('fr-FR')}</p>
                     {cmd.description && <p className="text-xs text-gray-400 mt-1">{cmd.description}</p>}
                   </div>
@@ -270,13 +344,13 @@ export default function ClientDetail() {
                       {cmd.avancePaye && <p className="text-xs text-gray-500">Avance: {cmd.avancePaye.toLocaleString()} FCFA</p>}
                     </div>
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      cmd.statut === 'prete' ? 'bg-green-100 text-green-700' :
-                      cmd.statut === 'livree' ? 'bg-gray-100 text-gray-600' :
-                      cmd.statut === 'refusee' ? 'bg-red-100 text-red-600' :
-                      cmd.statut === 'en_cours' ? 'bg-blue-100 text-blue-700' :
+                      cmd.vetements?.[0]?.statut === 'prete' || cmd.statut === 'prete' ? 'bg-green-100 text-green-700' :
+                      cmd.vetements?.[0]?.statut === 'livree' || cmd.statut === 'livree' ? 'bg-gray-100 text-gray-600' :
+                      cmd.vetements?.[0]?.statut === 'refusee' || cmd.statut === 'refusee' ? 'bg-red-100 text-red-600' :
+                      cmd.vetements?.[0]?.statut === 'en_cours' || cmd.statut === 'en_cours' ? 'bg-blue-100 text-blue-700' :
                       'bg-amber-100 text-amber-700'
                     }`}>
-                      {cmd.statut.replace('_', ' ')}
+                      {cmd.vetements?.[0]?.statut?.replace('_', ' ') || cmd.statut?.replace('_', ' ')}
                     </span>
                     <a href={`/admin/commandes/${cmd._id}`} className="text-rose-500 text-xs hover:underline">Voir</a>
                     <button onClick={() => deleteCommande(cmd._id)} className="text-red-500 text-xs hover:underline ml-2">
@@ -291,39 +365,109 @@ export default function ClientDetail() {
 
         {showCommandeModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-xl my-8">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl shadow-xl my-8">
             <h2 className="font-bold text-gray-800 mb-4">Nouvelle commande pour {client.nom}</h2>
             <form onSubmit={handleSubmit(createCommande)} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
-              <div>
-                <label className="label">Type de vêtement</label>
-                <input {...register('typeVetement', { required: true })} className="input" placeholder="Ex: Boubou, Pantalon, Chemise..." />
-              </div>
               
-              <div>
-                <label className="label">Description</label>
-                <textarea {...register('description', { required: true })} rows={3} className="input resize-none" placeholder="Détails de la commande..." />
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="label">Description globale (optionnel)</label>
+                  <textarea {...register('descriptionGlobale')} rows={2} className="input resize-none" placeholder="Informations générales sur la commande..." />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Prix total (FCFA)</label>
+                    <input {...register('prixTotal')} type="number" className="input" placeholder="Optionnel" />
+                  </div>
+                  <div>
+                    <label className="label">Date de livraison</label>
+                    <input {...register('dateLivraison')} type="date" className="input" />
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Prix total (FCFA)</label>
-                  <input {...register('prixTotal')} type="number" className="input" placeholder="Optionnel" />
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-700">Vêtements</h3>
+                  <button type="button" onClick={addVetement} className="text-sm bg-rose-500 text-white px-3 py-1.5 rounded-lg hover:bg-rose-600">
+                    + Ajouter un vêtement
+                  </button>
                 </div>
-                <div>
-                  <label className="label">Date de livraison</label>
-                  <input {...register('dateLivraison')} type="date" className="input" />
-                </div>
-              </div>
 
-              <div>
-                <label className="label">Photos (optionnel)</label>
-                <input type="file" {...register('images')} multiple accept="image/*" className="input" />
-                <p className="text-xs text-gray-400 mt-1">Jusqu'à 5 photos</p>
+                <div className="space-y-4">
+                  {vetements.map((v, idx) => (
+                    <div key={idx} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <div className="flex items-start justify-between mb-3">
+                        <span className="font-medium text-gray-700">Vêtement #{idx + 1}</span>
+                        <button type="button" onClick={() => removeVetement(idx)} className="text-red-500 text-sm hover:underline">
+                          Supprimer
+                        </button>
+                      </div>
+                      
+                      <div className="grid md:grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="label text-xs">Type de vêtement</label>
+                          <input 
+                            type="text" 
+                            value={v.typeVetement}
+                            onChange={(e) => updateVetement(idx, 'typeVetement', e.target.value)}
+                            className="input text-sm" 
+                            placeholder="Ex: Boubou bazin, Pantalon..." 
+                          />
+                        </div>
+                        <div>
+                          <label className="label text-xs">Quantité</label>
+                          <input 
+                            type="number" 
+                            value={v.quantite}
+                            onChange={(e) => updateVetement(idx, 'quantite', e.target.value)}
+                            className="input text-sm" 
+                            min="1"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="label text-xs">Description (optionnel)</label>
+                        <textarea 
+                          value={v.description}
+                          onChange={(e) => updateVetement(idx, 'description', e.target.value)}
+                          rows={2} 
+                          className="input resize-none text-sm" 
+                          placeholder="Détails spécifiques à ce vêtement..." 
+                        />
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="label text-xs">Photo du modèle (optionnel)</label>
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => updateVetement(idx, 'photoModele', e.target.files?.[0])}
+                            className="input text-sm" 
+                          />
+                          {v.photoModele && <p className="text-xs text-green-600 mt-1">✓ Photo sélectionnée</p>}
+                        </div>
+                        <div>
+                          <label className="label text-xs">Photo du tissu (optionnel)</label>
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => updateVetement(idx, 'photoTissu', e.target.files?.[0])}
+                            className="input text-sm" 
+                          />
+                          {v.photoTissu && <p className="text-xs text-green-600 mt-1">✓ Photo sélectionnée</p>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {client.sexe === 'homme' && client.mesuresHomme && Object.keys(client.mesuresHomme).length > 0 && (
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-blue-700 mb-2">Mesures enregistrées (Homme)</p>
+                  <p className="text-sm font-medium text-blue-700 mb-2">Mesures enregistrées (Homme) - appliquées à tous les vêtements</p>
                   <div className="grid grid-cols-2 gap-2 text-xs text-blue-600">
                     {Object.entries(client.mesuresHomme).slice(0, 6).map(([k, v]) => (
                       <div key={k} className="flex justify-between">
@@ -337,7 +481,7 @@ export default function ClientDetail() {
 
               {client.sexe === 'femme' && client.mesuresFemme && Object.keys(client.mesuresFemme).length > 0 && (
                 <div className="bg-pink-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-pink-700 mb-2">Mesures enregistrées (Femme)</p>
+                  <p className="text-sm font-medium text-pink-700 mb-2">Mesures enregistrées (Femme) - appliquées à tous les vêtements</p>
                   <div className="grid grid-cols-2 gap-2 text-xs text-pink-600">
                     {Object.entries(client.mesuresFemme).slice(0, 6).map(([k, v]) => (
                       <div key={k} className="flex justify-between">
@@ -350,7 +494,11 @@ export default function ClientDetail() {
               )}
 
               <div className="flex gap-3 pt-2 sticky bottom-0 bg-white">
-                <button type="button" onClick={() => setShowCommandeModal(false)}
+                <button type="button" onClick={() => {
+                  setShowCommandeModal(false);
+                  setVetements([{ typeVetement: '', description: '', quantite: 1, photoModele: null, photoTissu: null }]);
+                  reset({ descriptionGlobale: '', prixTotal: '', avancePaye: '', dateLivraison: '' });
+                }}
                   className="flex-1 border border-gray-200 rounded-xl py-2 text-sm text-gray-600 hover:bg-gray-50">
                   Annuler
                 </button>

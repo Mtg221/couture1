@@ -114,19 +114,19 @@ export default function ClientDashboard() {
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-green-500">
-                  {commandes.filter(c => c.statut === 'livree').length}
+                  {commandes.filter(c => c.statut === 'livree' || c.vetements?.some(v => v.statut === 'livree')).length}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">Livrées</div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-blue-500">
-                  {commandes.filter(c => c.statut === 'en_cours' || c.statut === 'prete').length}
+                  {commandes.filter(c => c.statut === 'en_cours' || c.statut === 'prete' || c.vetements?.some(v => v.statut === 'en_cours' || v.statut === 'prete')).length}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">En cours</div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-amber-500">
-                  {commandes.filter(c => c.statut === 'en_attente').length}
+                  {commandes.filter(c => c.statut === 'en_attente' || c.vetements?.some(v => v.statut === 'en_attente')).length}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">En attente</div>
               </div>
@@ -175,40 +175,55 @@ export default function ClientDashboard() {
             <p className="text-gray-400 text-sm py-4">Aucune commande pour le moment</p>
           ) : (
             <div className="space-y-4">
-              {commandes.map(cmd => (
+              {commandes.map(cmd => {
+                const vetements = cmd.vetements || (cmd.typeVetement ? [{
+                  typeVetement: cmd.typeVetement,
+                  description: cmd.description,
+                  photoModele: cmd.images?.[0],
+                  photoTissu: cmd.images?.[1],
+                  statut: cmd.statut,
+                }] : []);
+                const premierVetement = vetements[0];
+                const statut = premierVetement?.statut || cmd.statut || 'en_attente';
+                
+                return (
                 <div key={cmd._id} className="border border-gray-100 rounded-xl p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-gray-800">{cmd.typeVetement}</h3>
+                      <h3 className="font-semibold text-gray-800">
+                        {premierVetement?.typeVetement || 'Commande'}
+                        {vetements.length > 1 && <span className="text-xs text-gray-500 ml-1">(+{vetements.length - 1})</span>}
+                      </h3>
                       <p className="text-xs text-gray-500">{new Date(cmd.createdAt).toLocaleDateString('fr-FR')}</p>
                     </div>
                     <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                      cmd.statut === 'prete' ? 'bg-green-100 text-green-700' :
-                      cmd.statut === 'livree' ? 'bg-gray-100 text-gray-600' :
-                      cmd.statut === 'refusee' ? 'bg-red-100 text-red-600' :
-                      cmd.statut === 'en_cours' ? 'bg-blue-100 text-blue-700' :
+                      statut === 'prete' ? 'bg-green-100 text-green-700' :
+                      statut === 'livree' ? 'bg-gray-100 text-gray-600' :
+                      statut === 'refusee' ? 'bg-red-100 text-red-600' :
+                      statut === 'en_cours' ? 'bg-blue-100 text-blue-700' :
                       'bg-amber-100 text-amber-700'
                     }`}>
-                      {cmd.statut.replace('_', ' ')}
+                      {statut.replace('_', ' ')}
                     </span>
                   </div>
                   {cmd.description && (
                     <p className="text-sm text-gray-600 mb-2">{cmd.description}</p>
                   )}
-                  {cmd.images && cmd.images.length > 0 && (
+                  {(premierVetement?.photoModele || premierVetement?.photoTissu) && (
                     <div className="flex gap-2 mt-3">
-                      {cmd.images.slice(0, 3).map((img, idx) => (
+                      {premierVetement?.photoModele && (
                         <img 
-                          key={idx} 
-                          src={`http://localhost:3000/${img}`} 
-                          alt="Aperçu" 
+                          src={premierVetement.photoModele}
+                          alt="Modèle" 
                           className="w-16 h-16 object-cover rounded-lg border border-gray-200"
                         />
-                      ))}
-                      {cmd.images.length > 3 && (
-                        <div className="w-16 h-16 rounded-lg border border-gray-200 flex items-center justify-center bg-gray-50 text-xs text-gray-500">
-                          +{cmd.images.length - 3}
-                        </div>
+                      )}
+                      {premierVetement?.photoTissu && (
+                        <img 
+                          src={premierVetement.photoTissu}
+                          alt="Tissu" 
+                          className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                        />
                       )}
                     </div>
                   )}
@@ -240,7 +255,7 @@ export default function ClientDashboard() {
                     </div>
                   )}
                 </div>
-              ))}
+              );})}
             </div>
           )}
         </div>

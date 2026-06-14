@@ -57,10 +57,16 @@ export default function Commandes() {
               {commandes.map(c => (
                 <tr key={c._id} className="hover:bg-gray-50">
                   <td className="px-5 py-3 font-medium text-gray-800">{c.client?.nom}</td>
-                  <td className="px-5 py-3 text-gray-600">{c.typeVetement}</td>
+                  <td className="px-5 py-3 text-gray-600">
+                    {c.vetements?.length > 0 
+                      ? `${c.vetements[0].typeVetement}${c.vetements.length > 1 ? ` (+${c.vetements.length - 1})` : ''}`
+                      : c.typeVetement || 'N/A'}
+                  </td>
                   <td className="px-5 py-3">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${COLORS[c.statut]}`}>
-                      {c.statut.replace('_', ' ')}
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      c.vetements?.[0]?.statut ? COLORS[c.vetements[0].statut] : COLORS[c.statut]
+                    }`}>
+                      {(c.vetements?.[0]?.statut || c.statut || 'en_attente').replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-gray-400">{new Date(c.createdAt).toLocaleDateString('fr-FR')}</td>
