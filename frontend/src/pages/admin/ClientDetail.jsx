@@ -10,6 +10,7 @@ export default function ClientDetail() {
   const [client, setClient] = useState(null);
   const [commandes, setCommandes] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const [showCommandeModal, setShowCommandeModal] = useState(false);
   const { register, handleSubmit, reset, watch } = useForm();
   const sexe = watch('sexe');
 
@@ -86,6 +87,33 @@ export default function ClientDetail() {
       load();
     } catch {
       toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const createCommande = async (data) => {
+    try {
+      const images = data.images?.[0] ? Array.from(data.images) : [];
+      const formData = new FormData();
+      formData.append('client', id);
+      formData.append('typeVetement', data.typeVetement);
+      formData.append('description', data.description);
+      formData.append('sexe', client.sexe);
+      
+      if (data.prixTotal) formData.append('prixTotal', Number(data.prixTotal));
+      if (data.dateLivraison) formData.append('dateLivraison', data.dateLivraison);
+      
+      images.forEach(file => {
+        formData.append('images', file);
+      });
+
+      await api.post('/commandes', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      toast.success('Commande créée');
+      setShowCommandeModal(false);
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Erreur lors de la création');
     }
   };
 
@@ -219,7 +247,11 @@ export default function ClientDetail() {
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-gray-800">Commandes ({commandes.length})</h2>
+            <h2 className="font-bold text-gray-800">Historique des commandes ({commandes.length})</h2>
+            <button onClick={() => setShowCommandeModal(true)}
+              className="bg-rose-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-600">
+              + Nouvelle commande
+            </button>
           </div>
           {commandes.length === 0 ? (
             <p className="text-gray-400 text-sm">Aucune commande</p>
@@ -227,11 +259,16 @@ export default function ClientDetail() {
             <div className="space-y-3">
               {commandes.map(cmd => (
                 <div key={cmd._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium text-gray-800">{cmd.typeVetement}</p>
                     <p className="text-xs text-gray-500">{new Date(cmd.createdAt).toLocaleDateString('fr-FR')}</p>
+                    {cmd.description && <p className="text-xs text-gray-400 mt-1">{cmd.description}</p>}
                   </div>
                   <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      {cmd.prixTotal && <p className="text-sm font-medium text-gray-700">{cmd.prixTotal.toLocaleString()} FCFA</p>}
+                      {cmd.avancePaye && <p className="text-xs text-gray-500">Avance: {cmd.avancePaye.toLocaleString()} FCFA</p>}
+                    </div>
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                       cmd.statut === 'prete' ? 'bg-green-100 text-green-700' :
                       cmd.statut === 'livree' ? 'bg-gray-100 text-gray-600' :
@@ -249,9 +286,82 @@ export default function ClientDetail() {
                 </div>
               ))}
             </div>
-          )}
-        </div>
+)}
       </div>
+
+      {showCommandeModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-xl my-8">
+            <h2 className="font-bold text-gray-800 mb-4">Nouvelle commande pour {client.nom}</h2>
+            <form onSubmit={handleSubmit(createCommande)} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
+              <div>
+                <label className="label">Type de vêtement</label>
+                <input {...register('typeVetement', { required: true })} className="input" placeholder="Ex: Boubou, Pantalon, Chemise..." />
+              </div>
+              
+              <div>
+                <label className="label">Description</label>
+                <textarea {...register('description', { required: true })} rows={3} className="input resize-none" placeholder="Détails de la commande..." />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">Prix total (FCFA)</label>
+                  <input {...register('prixTotal')} type="number" className="input" placeholder="Optionnel" />
+                </div>
+                <div>
+                  <label className="label">Date de livraison</label>
+                  <input {...register('dateLivraison')} type="date" className="input" />
+                </div>
+              </div>
+
+              <div>
+                <label className="label">Photos (optionnel)</label>
+                <input type="file" {...register('images')} multiple accept="image/*" className="input" />
+                <p className="text-xs text-gray-400 mt-1">Jusqu'à 5 photos</p>
+              </div>
+
+              {client.sexe === 'homme' && client.mesuresHomme && Object.keys(client.mesuresHomme).length > 0 && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-blue-700 mb-2">Mesures enregistrées (Homme)</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-blue-600">
+                    {Object.entries(client.mesuresHomme).slice(0, 6).map(([k, v]) => (
+                      <div key={k} className="flex justify-between">
+                        <span>{k}:</span>
+                        <span className="font-medium">{v} cm</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {client.sexe === 'femme' && client.mesuresFemme && Object.keys(client.mesuresFemme).length > 0 && (
+                <div className="bg-pink-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-pink-700 mb-2">Mesures enregistrées (Femme)</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-pink-600">
+                    {Object.entries(client.mesuresFemme).slice(0, 6).map(([k, v]) => (
+                      <div key={k} className="flex justify-between">
+                        <span>{k}:</span>
+                        <span className="font-medium">{v} cm</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2 sticky bottom-0 bg-white">
+                <button type="button" onClick={() => setShowCommandeModal(false)}
+                  className="flex-1 border border-gray-200 rounded-xl py-2 text-sm text-gray-600 hover:bg-gray-50">
+                  Annuler
+                </button>
+                <button type="submit" className="flex-1 bg-rose-500 text-white rounded-xl py-2 text-sm font-medium hover:bg-rose-600">
+                  Créer la commande
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
