@@ -282,7 +282,7 @@ export default function ClientDetail() {
               <div><span className="text-gray-500">Créé le :</span> <span className="font-medium ml-2">{new Date(client.createdAt).toLocaleDateString('fr-FR')}</span></div>
             </div>
 
-            {client.mesuresHomme && Object.keys(client.mesuresHomme).length > 0 && (
+            {client.sexe === 'homme' && client.mesuresHomme && Object.keys(client.mesuresHomme).length > 0 && (
               <div className="mt-6 pt-6 border-t">
                 <h3 className="font-semibold text-gray-700 mb-3">Mesures (Homme)</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
@@ -296,7 +296,7 @@ export default function ClientDetail() {
               </div>
             )}
 
-            {client.mesuresFemme && Object.keys(client.mesuresFemme).length > 0 && (
+            {client.sexe === 'femme' && client.mesuresFemme && Object.keys(client.mesuresFemme).length > 0 && (
               <div className="mt-6 pt-6 border-t">
                 <h3 className="font-semibold text-gray-700 mb-3">Mesures (Femme)</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
