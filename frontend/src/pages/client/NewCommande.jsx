@@ -14,7 +14,6 @@ export default function NewCommande() {
   const [vetements, setVetements] = useState([{ typeVetement: '', description: '', quantite: 1, photoModele: null, photoTissu: null }]);
   const descriptionGlobale = watch('descriptionGlobale');
   const dateLivraison = watch('dateLivraison');
-  const prixTotal = watch('prixTotal');
 
   const addVetement = () => {
     setVetements([...vetements, { typeVetement: '', description: '', quantite: 1, photoModele: null, photoTissu: null }]);
@@ -46,7 +45,6 @@ export default function NewCommande() {
       const form = new FormData();
       form.append('description', descriptionGlobale || '');
       form.append('sexe', user?.sexe || 'homme');
-      if (prixTotal) form.append('prixTotal', Number(prixTotal));
       if (dateLivraison) form.append('dateLivraison', dateLivraison);
 
       const vetementsJson = vetementsValides.map((v, idx) => ({
@@ -101,15 +99,9 @@ export default function NewCommande() {
                 <textarea {...register('descriptionGlobale')} rows={3} className="input resize-none"
                   placeholder="Informations générales sur votre commande..." />
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Prix estimé (FCFA)</label>
-                  <input type="number" {...register('prixTotal')} className="input" placeholder="Optionnel" />
-                </div>
-                <div>
-                  <label className="label">Date de livraison souhaitée</label>
-                  <input type="date" {...register('dateLivraison')} className="input" />
-                </div>
+              <div>
+                <label className="label">Date de livraison souhaitée</label>
+                <input type="date" {...register('dateLivraison')} className="input" />
               </div>
             </div>
           </section>
