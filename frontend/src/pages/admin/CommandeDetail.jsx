@@ -13,6 +13,7 @@ export default function CommandeDetail() {
   const navigate         = useNavigate();
   const [cmd, setCmd]    = useState(null);
   const [paies, setPaies] = useState([]);
+  const [employes, setEmployes] = useState([]);
   const [vetementIndex, setVetementIndex] = useState(0);
   const { register, handleSubmit: hsStatut, setValue } = useForm();
   const { register: regP, handleSubmit: hsPaie, reset: resetP } = useForm();
@@ -27,8 +28,10 @@ export default function CommandeDetail() {
       }
       setCmd(data);
     });
-    if (user?.role === 'admin')
+    if (user?.role === 'admin') {
       api.get(`/paiements/commande/${id}`).then(r => setPaies(r.data));
+      api.get('/employes').then(r => setEmployes(r.data));
+    }
   };
 
   useEffect(() => { load(); }, [id]);
@@ -60,7 +63,11 @@ export default function CommandeDetail() {
 
   const addPaiement = async (data) => {
     try {
-      await api.post('/paiements', { ...data, commande: id });
+      await api.post('/paiements', { 
+        ...data, 
+        commande: id,
+        employeId: data.employeId || null,
+      });
       toast.success('Paiement enregistré'); resetP(); load();
     } catch { toast.error('Erreur'); }
   };
@@ -269,6 +276,15 @@ export default function CommandeDetail() {
                       </select>
                     </div>
                   </div>
+                  <div>
+                    <label className="label">Reçu par (employé)</label>
+                    <select {...regP('employeId')} className="input text-sm">
+                      <option value="">-- Non spécifié --</option>
+                      {employes.map(e => (
+                        <option key={e._id} value={e._id}>{e.nom} {e.poste && `(${e.poste})`}</option>
+                      ))}
+                    </select>
+                  </div>
                   <input {...regP('note')} className="input" placeholder="Note (optionnel)" />
                   <button type="submit" className="w-full bg-green-500 text-white py-2 rounded-xl text-sm font-medium hover:bg-green-600">
                     Enregistrer paiement
@@ -285,6 +301,7 @@ export default function CommandeDetail() {
                           <tr>
                             <th className="text-left px-3 py-2 font-medium text-gray-600">Date</th>
                             <th className="text-left px-3 py-2 font-medium text-gray-600">Mode</th>
+                            <th className="text-left px-3 py-2 font-medium text-gray-600">Reçu par</th>
                             <th className="text-right px-3 py-2 font-medium text-gray-600">Montant</th>
                           </tr>
                         </thead>
@@ -308,6 +325,13 @@ export default function CommandeDetail() {
                                    p.mode === 'orange_money' ? 'Orange Money' :
                                    p.mode === 'carte_bancaire' ? 'Carte' : 'Autre'}
                                 </span>
+                              </td>
+                              <td className="px-3 py-2">
+                                {p.employe ? (
+                                  <span className="text-gray-700 font-medium">{p.employe.nom}</span>
+                                ) : (
+                                  <span className="text-gray-400 text-xs">Non spécifié</span>
+                                )}
                               </td>
                               <td className="px-3 py-2 text-right font-semibold text-green-600">
                                 +{p.montant?.toLocaleString()} FCFA

@@ -379,6 +379,7 @@ export default function ClientDetail() {
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Date</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Commande</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-600">Mode</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600">Reçu par</th>
                       <th className="text-right px-4 py-3 font-medium text-gray-600">Montant</th>
                     </tr>
                   </thead>
@@ -410,6 +411,13 @@ export default function ClientDetail() {
                              p.mode === 'orange_money' ? 'Orange Money' :
                              p.mode === 'carte_bancaire' ? 'Carte' : 'Autre'}
                           </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {p.employe ? (
+                            <span className="text-gray-700 font-medium">{p.employe.nom}</span>
+                          ) : (
+                            <span className="text-gray-400 text-xs">Non spécifié</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-right font-semibold text-green-600">
                           {p.montant?.toLocaleString()} FCFA

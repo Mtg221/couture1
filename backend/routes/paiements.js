@@ -6,14 +6,16 @@ const { protect, adminOnly } = require('../middleware/auth');
 router.use(protect);
 
 router.get('/', adminOnly, async (req, res) => {
-  const { clientId, commandeId } = req.query;
+  const { clientId, commandeId, employeId } = req.query;
   const query = {};
   
   if (clientId) query.client = clientId;
   if (commandeId) query.commande = commandeId;
+  if (employeId) query.employe = employeId;
   
   const paiements = await Paiement.find(query)
     .populate('commande', 'typeVetement')
+    .populate('employe', 'nom telephone poste')
     .sort({ createdAt: -1 });
   res.json(paiements);
 });
@@ -21,6 +23,7 @@ router.get('/', adminOnly, async (req, res) => {
 router.get('/commande/:commandeId', async (req, res) => {
   const paiements = await Paiement.find({ commande: req.params.commandeId })
     .populate('client', 'nom telephone')
+    .populate('employe', 'nom telephone poste')
     .sort({ createdAt: -1 });
   res.json(paiements);
 });
@@ -32,13 +35,22 @@ router.get('/client/:clientId', async (req, res) => {
   
   const paiements = await Paiement.find({ client: req.params.clientId })
     .populate('commande', 'typeVetement statut')
+    .populate('employe', 'nom telephone poste')
+    .sort({ createdAt: -1 });
+  res.json(paiements);
+});
+
+router.get('/employe/:employeId', adminOnly, async (req, res) => {
+  const paiements = await Paiement.find({ employe: req.params.employeId })
+    .populate('commande', 'typeVetement')
+    .populate('client', 'nom telephone')
     .sort({ createdAt: -1 });
   res.json(paiements);
 });
 
 router.post('/', adminOnly, async (req, res) => {
   try {
-    const { commande, montant, mode, note } = req.body;
+    const { commande, montant, mode, note, employeId } = req.body;
     
     const commandeDoc = await Commande.findById(commande);
     if (!commandeDoc) {
@@ -51,6 +63,7 @@ router.post('/', adminOnly, async (req, res) => {
       montant,
       mode,
       note,
+      employe: employeId || null,
     });
     
     await Commande.findByIdAndUpdate(
