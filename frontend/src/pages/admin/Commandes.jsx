@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../api/axios';
 
 const STATUTS = ['tous', 'en_attente', 'en_cours', 'prete', 'livree', 'refusee'];
@@ -14,11 +15,32 @@ const COLORS  = {
 export default function Commandes() {
   const [commandes, setCommandes] = useState([]);
   const [statut, setStatut]       = useState('tous');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [commandeToDelete, setCommandeToDelete] = useState(null);
 
   useEffect(() => {
     const params = statut !== 'tous' ? { statut } : {};
     api.get('/commandes', { params }).then(r => setCommandes(r.data));
   }, [statut]);
+
+  const confirmDelete = (id) => {
+    setCommandeToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const deleteCommande = async () => {
+    try {
+      await api.delete(`/commandes/${commandeToDelete}`);
+      toast.success('Commande supprimée');
+      setCommandes(commandes.filter(c => c._id !== commandeToDelete));
+      setShowDeleteModal(false);
+      setCommandeToDelete(null);
+    } catch {
+      toast.error('Erreur lors de la suppression');
+      setShowDeleteModal(false);
+      setCommandeToDelete(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -71,7 +93,15 @@ export default function Commandes() {
                   </td>
                   <td className="px-5 py-3 text-gray-400">{new Date(c.createdAt).toLocaleDateString('fr-FR')}</td>
                   <td className="px-5 py-3 text-right">
-                    <Link to={`/admin/commandes/${c._id}`} className="text-rose-500 hover:underline text-xs">Voir</Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link to={`/admin/commandes/${c._id}`} className="text-rose-500 hover:underline text-xs">Voir</Link>
+                      <button 
+                        onClick={() => confirmDelete(c._id)}
+                        className="text-red-600 hover:text-red-800 text-xs font-medium"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -82,6 +112,34 @@ export default function Commandes() {
           )}
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-800 mb-2">Confirmer la suppression</h3>
+            <p className="text-gray-600 mb-6">
+              Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setCommandeToDelete(null);
+                }}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-xl text-sm font-medium transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={deleteCommande}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl text-sm font-medium transition-colors"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
