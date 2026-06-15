@@ -62,6 +62,7 @@ export default function Login() {
 
         <div className="mt-6 pt-6 border-t border-gray-100 text-center text-sm text-gray-500">
           <p>Accès administrateur et client</p>
+          <a href="/" className="text-rose-500 hover:text-rose-600 mt-2 block">← Retour à l'accueil</a>
         </div>
       </div>
     </div>

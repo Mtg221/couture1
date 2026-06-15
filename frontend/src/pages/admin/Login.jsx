@@ -40,6 +40,9 @@ export default function Login() {
             {isSubmitting ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
+        <div className="mt-6 pt-6 border-t border-gray-100 text-center text-sm text-gray-500">
+          <a href="/" className="text-rose-500 hover:text-rose-600">← Retour à l'accueil</a>
+        </div>
       </div>
     </div>
   );
