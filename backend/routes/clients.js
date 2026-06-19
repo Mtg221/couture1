@@ -1,23 +1,38 @@
 const router = require('express').Router();
 const Client = require('../models/Client');
 const User   = require('../models/User');
-const { protect, adminOnly } = require('../middleware/auth');
+const { protect, adminOnly, staffOnly } = require('../middleware/auth');
 
 router.use(protect);
 
-router.get('/', async (req, res) => {
-  const { search } = req.query;
-  const query = search
-    ? { $or: [{ nom: new RegExp(search, 'i') }, { telephone: new RegExp(search, 'i') }] }
-    : {};
-  const clients = await Client.find(query).sort({ createdAt: -1 });
-  res.json(clients);
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+router.get('/', staffOnly, async (req, res) => {
+  try {
+    const { search } = req.query;
+    const query = search
+      ? { $or: [{ nom: new RegExp(escapeRegex(search), 'i') }, { telephone: new RegExp(escapeRegex(search), 'i') }] }
+      : {};
+    const clients = await Client.find(query).sort({ createdAt: -1 });
+    res.json(clients);
+  } catch (err) {
+    console.error('Clients GET error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
 router.get('/:id', async (req, res) => {
-  const client = await Client.findById(req.params.id).select('-passwordHash');
-  if (!client) return res.status(404).json({ message: 'Client introuvable' });
-  res.json(client);
+  try {
+    if (req.user.role === 'client' && req.params.id !== req.user.clientId) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+    const client = await Client.findById(req.params.id).select('-passwordHash');
+    if (!client) return res.status(404).json({ message: 'Client introuvable' });
+    res.json(client);
+  } catch (err) {
+    console.error('Client GET by ID error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
 router.post('/', adminOnly, async (req, res) => {
@@ -48,7 +63,8 @@ router.post('/', adminOnly, async (req, res) => {
     
     res.status(201).json(client);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Client POST error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -82,14 +98,20 @@ router.put('/:id', adminOnly, async (req, res) => {
     const client = await Client.findByIdAndUpdate(req.params.id, updateOps, { new: true }).select('-passwordHash');
     res.json(client);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Client PUT error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 router.delete('/:id', adminOnly, async (req, res) => {
-  await Client.findByIdAndDelete(req.params.id);
-  await User.deleteMany({ clientId: req.params.id });
-  res.json({ message: 'Client supprimé' });
+  try {
+    await Client.findByIdAndDelete(req.params.id);
+    await User.deleteMany({ clientId: req.params.id });
+    res.json({ message: 'Client supprimé' });
+  } catch (err) {
+    console.error('Client DELETE error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
 module.exports = router;

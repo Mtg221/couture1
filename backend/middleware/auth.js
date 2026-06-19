@@ -23,4 +23,10 @@ const clientOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { protect, adminOnly, clientOnly };
+const staffOnly = (req, res, next) => {
+  if (!['admin', 'secretaire'].includes(req.user.role))
+    return res.status(403).json({ message: 'Accès réservé au staff' });
+  next();
+};
+
+module.exports = { protect, adminOnly, clientOnly, staffOnly };

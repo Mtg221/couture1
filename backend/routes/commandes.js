@@ -6,6 +6,7 @@ const { protect, adminOnly, clientOnly } = require('../middleware/auth');
 const generateInvoicePDF = require('../utils/generateInvoice');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 router.post('/public', upload.fields([
   { name: 'photoModele_0', maxCount: 1 },
@@ -17,12 +18,21 @@ router.post('/public', upload.fields([
     
     let client = await Client.findOne({ telephone });
     if (!client) {
+      const tempPassword = crypto.randomBytes(16).toString('hex');
       client = await Client.create({ 
         nom, 
         telephone, 
         email: `${telephone}@temp.com`, 
-        passwordHash: 'temp123' 
+        passwordHash: tempPassword 
       });
+      
+      res.status(201).json({ 
+        message: 'Commande reçue', 
+        id: client._id,
+        temporaryPassword: tempPassword,
+        note: 'Conservez ce mot de passe temporaire. Vous devrez le changer lors de votre première connexion.'
+      });
+      return;
     }
 
     const photos = req.files || {};
@@ -43,49 +53,65 @@ router.post('/public', upload.fields([
     });
     res.status(201).json({ message: 'Commande reçue', id: commande._id });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Commande POST public error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 router.use(protect);
 
 router.get('/', async (req, res) => {
-  const { statut, clientId } = req.query;
-  const query = {};
-  
-  if (req.user.role === 'client') {
-    query.client = req.user.clientId;
-  } else {
-    if (statut) query.statut = statut;
-    if (clientId) query.client = clientId;
+  try {
+    const { statut, clientId } = req.query;
+    const query = {};
+    
+    if (req.user.role === 'client') {
+      query.client = req.user.clientId;
+    } else {
+      if (statut) query.statut = statut;
+      if (clientId) query.client = clientId;
+    }
+    
+    const commandes = await Commande.find(query)
+      .populate('client', 'nom telephone')
+      .sort({ createdAt: -1 });
+    res.json(commandes);
+  } catch (err) {
+    console.error('Commandes GET error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
-  
-  const commandes = await Commande.find(query)
-    .populate('client', 'nom telephone')
-    .sort({ createdAt: -1 });
-  res.json(commandes);
 });
 
 router.get('/:id', async (req, res) => {
-  const commande = await Commande.findById(req.params.id)
-    .populate('client');
-  if (!commande) return res.status(404).json({ message: 'Commande introuvable' });
-  
-  if (req.user.role === 'client' && commande.client._id.toString() !== req.user.clientId) {
-    return res.status(403).json({ message: 'Accès non autorisé' });
+  try {
+    const commande = await Commande.findById(req.params.id)
+      .populate('client');
+    if (!commande) return res.status(404).json({ message: 'Commande introuvable' });
+    
+    if (req.user.role === 'client' && commande.client._id.toString() !== req.user.clientId) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+    
+    res.json(commande);
+  } catch (err) {
+    console.error('Commande GET by ID error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
-  
-  res.json(commande);
 });
 
 router.get('/client/:clientId', async (req, res) => {
-  if (req.user.role === 'client' && req.params.clientId !== req.user.clientId) {
-    return res.status(403).json({ message: 'Accès non autorisé' });
+  try {
+    if (req.user.role === 'client' && req.params.clientId !== req.user.clientId) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+    
+    const commandes = await Commande.find({ client: req.params.clientId })
+      .sort({ createdAt: -1 });
+    res.json(commandes);
+  } catch (err) {
+    console.error('Commandes GET by client error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
-  
-  const commandes = await Commande.find({ client: req.params.clientId })
-    .sort({ createdAt: -1 });
-  res.json(commandes);
 });
 
 router.post('/', protect, upload.fields([
@@ -135,7 +161,8 @@ router.post('/', protect, upload.fields([
     });
     res.status(201).json(commande);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Commande POST error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -206,13 +233,19 @@ router.put('/:id', adminOnly, upload.fields([
     await commande.save();
     res.json(commande);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Commande PUT error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 router.delete('/:id', adminOnly, async (req, res) => {
-  await Commande.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Commande supprimée' });
+  try {
+    await Commande.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Commande supprimée' });
+  } catch (err) {
+    console.error('Commande DELETE error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
 router.get('/:id/facture', adminOnly, async (req, res) => {
@@ -234,7 +267,8 @@ router.get('/:id/facture', adminOnly, async (req, res) => {
       setTimeout(() => fs.unlinkSync(filePath), 1000);
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Facture GET error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

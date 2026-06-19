@@ -1,30 +1,53 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(helmet());
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.CLIENT_URL,
+].filter(Boolean);
 
 app.use(cors({
   origin: function(origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5173',
-      process.env.CLIENT_URL,
-      ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL.replace('https://', '')] : []),
-    ];
-    
-    if (!origin || allowedOrigins.some(o => origin === o || origin.endsWith('.vercel.app') || origin.endsWith(o))) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.warn('CORS blocked:', origin);
-      callback(null, false);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true
 }));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { message: 'Trop de tentatives, veuillez réessayer dans 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const publicLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: { message: 'Trop de requêtes, veuillez réessayer dans 1 minute' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/auth/login', apiLimiter);
+app.use('/api/commandes/public', publicLimiter);
+app.use('/api/messages', publicLimiter);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth',      require('./routes/auth'));

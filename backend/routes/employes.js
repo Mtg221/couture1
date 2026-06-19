@@ -1,22 +1,33 @@
 const router = require('express').Router();
 const Employe = require('../models/Employe');
-const { protect, adminOnly } = require('../middleware/auth');
+const { protect, adminOnly, staffOnly } = require('../middleware/auth');
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 router.use(protect);
 
-router.get('/', async (req, res) => {
-  const { search } = req.query;
-  const query = search
-    ? { $or: [{ nom: new RegExp(search, 'i') }, { telephone: new RegExp(search, 'i') }, { email: new RegExp(search, 'i') }] }
-    : {};
-  const employes = await Employe.find(query).sort({ createdAt: -1 });
-  res.json(employes);
+router.get('/', staffOnly, async (req, res) => {
+  try {
+    const { search } = req.query;
+    const query = search
+      ? { $or: [{ nom: new RegExp(escapeRegex(search), 'i') }, { telephone: new RegExp(escapeRegex(search), 'i') }, { email: new RegExp(escapeRegex(search), 'i') }] }
+      : {};
+    const employes = await Employe.find(query).sort({ createdAt: -1 });
+    res.json(employes);
+  } catch (err) {
+    console.error('Employes GET error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
-router.get('/:id', async (req, res) => {
-  const employe = await Employe.findById(req.params.id);
-  if (!employe) return res.status(404).json({ message: 'Employé introuvable' });
-  res.json(employe);
+router.get('/:id', staffOnly, async (req, res) => {
+  try {
+    const employe = await Employe.findById(req.params.id);
+    if (!employe) return res.status(404).json({ message: 'Employé introuvable' });
+    res.json(employe);
+  } catch (err) {
+    console.error('Employe GET by ID error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
 router.post('/', adminOnly, async (req, res) => {
@@ -42,7 +53,8 @@ router.post('/', adminOnly, async (req, res) => {
     
     res.status(201).json(employe);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Employe POST error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -66,13 +78,19 @@ router.put('/:id', adminOnly, async (req, res) => {
     const employe = await Employe.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(employe);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Employe PUT error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 router.delete('/:id', adminOnly, async (req, res) => {
-  await Employe.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Employé supprimé' });
+  try {
+    await Employe.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Employé supprimé' });
+  } catch (err) {
+    console.error('Employe DELETE error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
 module.exports = router;

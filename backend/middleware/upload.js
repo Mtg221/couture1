@@ -13,4 +13,7 @@ const storage = new CloudinaryStorage({
   params: { folder: 'couture', allowed_formats: ['jpg', 'png', 'webp', 'jpeg'] },
 });
 
-module.exports = multer({ storage });
+module.exports = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});

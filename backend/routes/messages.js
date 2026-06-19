@@ -1,6 +1,6 @@
 const router  = require('express').Router();
 const Message = require('../models/Message');
-const { protect } = require('../middleware/auth');
+const { protect, staffOnly } = require('../middleware/auth');
 
 // Public — formulaire de contact
 router.post('/', async (req, res) => {
@@ -8,19 +8,30 @@ router.post('/', async (req, res) => {
     const msg = await Message.create(req.body);
     res.status(201).json({ message: 'Message envoyé' });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Message POST error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 // Admin
-router.get('/', protect, async (req, res) => {
-  const messages = await Message.find().sort({ createdAt: -1 });
-  res.json(messages);
+router.get('/', staffOnly, async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (err) {
+    console.error('Messages GET error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
-router.put('/:id/lu', protect, async (req, res) => {
-  await Message.findByIdAndUpdate(req.params.id, { lu: true });
-  res.json({ message: 'Marqué comme lu' });
+router.put('/:id/lu', staffOnly, async (req, res) => {
+  try {
+    await Message.findByIdAndUpdate(req.params.id, { lu: true });
+    res.json({ message: 'Marqué comme lu' });
+  } catch (err) {
+    console.error('Message PUT error:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
 });
 
 module.exports = router;
