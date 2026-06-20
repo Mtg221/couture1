@@ -10,7 +10,7 @@ export default function Home() {
 
       {/* Hero */}
       <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-20 bg-gradient-to-b from-rose-100 via-rose-50 to-white">
-        <div className="animate-fade-in">
+        <div className="animate-fade-in flex flex-col items-center justify-center min-h-[60vh] w-full">
           <img src={logo} alt="NKG Couture" className="h-40 md:h-52 w-auto mb-10 drop-shadow-lg transition-transform duration-500 hover:scale-105" />
           <span className="inline-block text-rose-500 font-medium text-sm tracking-widest uppercase mb-6 bg-rose-50 px-4 py-2 rounded-full">
             Atelier de couture · Dakar
