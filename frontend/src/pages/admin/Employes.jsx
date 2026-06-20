@@ -10,6 +10,7 @@ export default function Employes() {
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { register, handleSubmit, reset } = useForm();
 
   const load = () => api.get('/employes', { params: { search } }).then(r => setEmployes(r.data));

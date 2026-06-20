@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/logo.png';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const { pathname } = useLocation();
 
   const menuItems = [
@@ -48,44 +48,68 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg z-30 overflow-y-auto">
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-100">
-        <Link to="/" className="flex items-center justify-center">
-          <img src={logo} alt="NKG Couture" className="h-12 w-auto transition-transform duration-300 hover:scale-105" />
-        </Link>
-      </div>
+    <>
+      {/* Overlay pour mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden animate-fade-in"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Navigation */}
-      <nav className="p-4 space-y-1">
-        {menuItems.map(item => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
-              pathname === item.to
-                ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-                : 'text-gray-600 hover:bg-rose-50 hover:text-rose-500'
-            }`}
-          >
-            {item.icon}
-            <span>{item.label}</span>
+      {/* Sidebar */}
+      <aside className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg z-50 overflow-y-auto transition-transform duration-300 md:translate-x-0 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {/* Logo */}
+        <div className="p-6 border-b border-gray-100">
+          <Link to="/" className="flex items-center justify-center">
+            <img src={logo} alt="NKG Couture" className="h-12 w-auto transition-transform duration-300 hover:scale-105" />
           </Link>
-        ))}
-      </nav>
+          {/* Bouton fermer (mobile only) */}
+          <button 
+            onClick={onClose}
+            className="md:hidden absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-      {/* Footer sidebar */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
-        <Link
-          to="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-rose-500 transition-all duration-300"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          <span>Retour au site</span>
-        </Link>
-      </div>
-    </aside>
+        {/* Navigation */}
+        <nav className="p-4 space-y-1">
+          {menuItems.map(item => (
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={onClose}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                pathname === item.to
+                  ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
+                  : 'text-gray-600 hover:bg-rose-50 hover:text-rose-500'
+              }`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        {/* Footer sidebar */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+          <Link
+            to="/"
+            onClick={onClose}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-rose-500 transition-all duration-300"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Retour au site</span>
+          </Link>
+        </div>
+      </aside>
+    </>
   );
 }

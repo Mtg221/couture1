@@ -10,6 +10,7 @@ export default function Clients() {
   const [search, setSearch]   = useState('');
   const [modal, setModal]     = useState(false);
   const [createdPassword, setCreatedPassword] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { register, handleSubmit, reset } = useForm();
 
   const load = () => api.get('/clients', { params: { search } }).then(r => setClients(r.data));
@@ -29,94 +30,107 @@ export default function Clients() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div className="ml-64">
+      <div className="md:ml-64">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-5 sticky top-0 z-20 shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-800">Clients</h1>
+        <header className="bg-white border-b border-gray-200 px-4 md:px-8 py-4 sticky top-0 z-20 shadow-sm">
+          <div className="flex items-center gap-4">
+            {/* Bouton hamburger (mobile) */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all duration-300"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800">Clients</h1>
+          </div>
         </header>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Search & Create */}
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between mb-6">
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="input max-w-sm"
+              className="input w-full sm:max-w-sm"
               placeholder="Rechercher par nom ou téléphone..."
             />
             <button 
               onClick={() => setModal(true)}
-              className="inline-flex items-center gap-2 bg-rose-500 text-white px-5 py-3 rounded-xl text-sm font-medium hover:bg-rose-600 transition-all duration-300 shadow-lg shadow-rose-500/30 transform hover:scale-105"
+              className="inline-flex items-center gap-2 bg-rose-500 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm font-medium hover:bg-rose-600 transition-all duration-300 shadow-lg shadow-rose-500/30 transform hover:scale-105 w-full sm:w-auto justify-center"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Nouveau client
+              <span>Nouveau client</span>
             </button>
           </div>
 
           {/* Tableau */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
-                <tr>
-                  <th className="text-left px-6 py-4 font-semibold text-gray-700">Nom</th>
-                  <th className="text-left px-6 py-4 font-semibold text-gray-700">Téléphone</th>
-                  <th className="text-left px-6 py-4 font-semibold text-gray-700">Email</th>
-                  <th className="text-left px-6 py-4 font-semibold text-gray-700">Sexe</th>
-                  <th className="text-left px-6 py-4 font-semibold text-gray-700">Depuis</th>
-                  <th className="px-6 py-4 text-right" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {clients.map(c => (
-                  <tr key={c._id} className="hover:bg-gray-50 transition-colors duration-300">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
-                          {c.nom.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="font-medium text-gray-800">{c.nom}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{c.telephone}</td>
-                    <td className="px-6 py-4 text-gray-600">{c.email}</td>
-                    <td className="px-6 py-4">
-                      <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${c.sexe === 'homme' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
-                        {c.sexe}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {new Date(c.createdAt).toLocaleDateString('fr-FR')}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link 
-                        to={`/admin/clients/${c._id}`} 
-                        className="inline-flex items-center gap-1 text-rose-500 hover:text-rose-600 font-medium bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg text-xs transition-all duration-300"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        Voir
-                      </Link>
-                    </td>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden overflow-x-auto">
+            <div className="min-w-[900px]">
+              <table className="w-full text-xs md:text-sm">
+                <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+                  <tr>
+                    <th className="text-left px-4 md:px-6 py-3 md:py-4 font-semibold text-gray-700">Nom</th>
+                    <th className="text-left px-4 md:px-6 py-3 md:py-4 font-semibold text-gray-700">Téléphone</th>
+                    <th className="text-left px-4 md:px-6 py-3 md:py-4 font-semibold text-gray-700">Email</th>
+                    <th className="text-left px-4 md:px-6 py-3 md:py-4 font-semibold text-gray-700">Sexe</th>
+                    <th className="text-left px-4 md:px-6 py-3 md:py-4 font-semibold text-gray-700">Depuis</th>
+                    <th className="px-4 md:px-6 py-3 md:py-4 text-right" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {clients.length === 0 && (
-              <div className="text-center py-16">
-                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
-                </svg>
-                <p className="text-gray-400">Aucun client trouvé</p>
-              </div>
-            )}
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {clients.map(c => (
+                    <tr key={c._id} className="hover:bg-gray-50 transition-colors duration-300">
+                      <td className="px-4 md:px-6 py-3 md:py-4">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-md flex-shrink-0">
+                            {c.nom.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-medium text-gray-800 text-xs md:text-base">{c.nom}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 md:px-6 py-3 md:py-4 text-gray-600 text-xs md:text-sm">{c.telephone}</td>
+                      <td className="px-4 md:px-6 py-3 md:py-4 text-gray-600 text-xs md:text-sm">{c.email}</td>
+                      <td className="px-4 md:px-6 py-3 md:py-4">
+                        <span className={`text-xs px-2 md:px-3 py-1 rounded-full font-medium ${c.sexe === 'homme' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
+                          {c.sexe}
+                        </span>
+                      </td>
+                      <td className="px-4 md:px-6 py-3 md:py-4 text-gray-500 text-xs md:text-sm">
+                        {new Date(c.createdAt).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                        <Link 
+                          to={`/admin/clients/${c._id}`} 
+                          className="inline-flex items-center gap-1 text-rose-500 hover:text-rose-600 font-medium bg-rose-50 hover:bg-rose-100 px-2 md:px-3 py-1 md:py-1.5 rounded-lg text-xs transition-all duration-300"
+                        >
+                          <svg className="w-3 h-3 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span className="hidden sm:inline">Voir</span>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {clients.length === 0 && (
+                <div className="text-center py-12 md:py-16">
+                  <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
+                  </svg>
+                  <p className="text-gray-400 text-sm md:text-base">Aucun client trouvé</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ const CATEGORIES = ['robe', 'costume', 'boubou', 'tailleur', 'enfant', 'autre'];
 export default function GalerieAdmin() {
   const [items, setItems] = useState([]);
   const [modal, setModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [file, setFile]   = useState(null);
   const { register, handleSubmit, reset } = useForm();
 
