@@ -14,10 +14,10 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-auto py-2">
-        <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="NKG Couture" className="h-12 w-auto" />
+    <nav className="bg-white/95 backdrop-blur-sm shadow-md shadow-gray-200/50 sticky top-0 z-40 transition-all duration-300">
+      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-auto py-3">
+        <Link to="/" className="flex items-center gap-3 group">
+          <img src={logo} alt="NKG Couture" className="h-14 w-auto transition-transform duration-300 group-hover:scale-105" />
         </Link>
 
         {/* Desktop */}
@@ -26,11 +26,11 @@ export default function Navbar() {
             <Link
               key={l.to}
               to={l.to}
-              className={`text-sm font-medium transition-colors ${
+              className={`text-sm font-medium transition-all duration-300 relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-0.5 after:bg-rose-500 after:transition-all after:duration-300 hover:after:w-full ${
                 l.auth
-                  ? 'bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600'
+                  ? 'bg-rose-500 text-white px-5 py-2.5 rounded-xl hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30 after:hidden'
                   : pathname === l.to
-                    ? 'text-rose-600'
+                    ? 'text-rose-600 after:w-full'
                     : 'text-gray-600 hover:text-rose-500'
               }`}
             >
@@ -41,7 +41,7 @@ export default function Navbar() {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-gray-600"
+          className="md:hidden text-gray-600 hover:text-rose-500 transition-colors duration-300"
           onClick={() => setOpen(!open)}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,16 +53,16 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-white border-t px-4 pb-4 flex flex-col gap-3">
+        <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-100 px-4 pb-4 flex flex-col gap-3 animate-fade-in">
           {links.map(l => (
             <Link
               key={l.to}
               to={l.to}
               onClick={() => setOpen(false)}
-              className={`py-2 font-medium ${
+              className={`py-3 font-medium rounded-xl transition-all duration-300 ${
                 l.auth
-                  ? 'bg-rose-500 text-white px-4 rounded-lg text-center'
-                  : 'text-gray-700'
+                  ? 'bg-rose-500 text-white px-4 text-center hover:bg-rose-600'
+                  : 'text-gray-700 hover:bg-rose-50 hover:text-rose-500'
               }`}
             >
               {l.label}
