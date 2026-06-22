@@ -7,20 +7,29 @@ async function seedAdmin() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('MongoDB connecté');
 
-    const existingAdmin = await User.findOne({ username: 'nkg' });
+    const username = process.env.ADMIN_USERNAME;
+    const password = process.env.ADMIN_PASSWORD;
+
+    if (!username || !password) {
+      console.error('Erreur: ADMIN_USERNAME et ADMIN_PASSWORD doivent être définis dans .env');
+      await mongoose.disconnect();
+      process.exit(1);
+    }
+
+    const existingAdmin = await User.findOne({ username });
     if (existingAdmin) {
-      console.log('L\'admin nkg existe déjà');
+      console.log(`L'admin ${username} existe déjà`);
       await mongoose.disconnect();
       return;
     }
 
     await User.create({
-      username: 'nkg',
-      passwordHash: '18safar',
+      username,
+      passwordHash: password,
       role: 'admin'
     });
 
-    console.log('Admin nkg créé avec succès');
+    console.log(`Admin ${username} créé avec succès`);
     await mongoose.disconnect();
   } catch (err) {
     console.error('Erreur:', err);
