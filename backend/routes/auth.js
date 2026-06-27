@@ -19,11 +19,12 @@ router.post('/login', async (req, res) => {
       
       user = await User.findOne({ clientId: clientData._id });
       if (!user) {
+        // passwordHash sera hashé par le hook pre-save du modèle User
         user = await User.create({
           username: email,
           passwordHash: password,
           role: 'client',
-          clientId: clientData._id
+          clientId: clientData._id,
         });
       }
     } else {
@@ -38,19 +39,42 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role, username: user.username, clientId: clientData?._id },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '8h' }
     );
-    
-    res.json({ 
-      token, 
-      role: user.role, 
+
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      refreshToken,
+      role: user.role,
       username: user.username,
       clientId: clientData?._id,
-      client: clientData 
+      client: clientData
     });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+router.post('/refresh', (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) return res.status(401).json({ message: 'Refresh token manquant' });
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+    const token = jwt.sign(
+      { id: decoded.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+    res.json({ token });
+  } catch {
+    res.status(401).json({ message: 'Refresh token invalide ou expiré' });
   }
 });
 
