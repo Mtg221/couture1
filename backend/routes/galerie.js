@@ -22,7 +22,7 @@ router.post('/', protect, adminOnly, upload.single('image'), async (req, res) =>
     });
     res.status(201).json(item);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: "Erreur lors du traitement" });
   }
 });
 

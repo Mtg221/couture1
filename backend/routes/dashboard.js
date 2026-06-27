@@ -64,7 +64,7 @@ router.get('/recapitulatif', protect, adminOnly, async (req, res) => {
     
     res.json(recap);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Erreur serveur" });
   }
 });
 
@@ -103,7 +103,7 @@ router.get('/recettes', protect, adminOnly, async (req, res) => {
     
     res.json(recap);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Erreur serveur" });
   }
 });
 
