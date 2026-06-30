@@ -28,7 +28,7 @@ app.use(cors({
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 50,
+  max: 5,
   message: { message: 'Trop de tentatives, veuillez réessayer dans 15 minutes' },
   standardHeaders: true,
   legacyHeaders: false,
