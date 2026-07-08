@@ -4,6 +4,8 @@ Application web fullstack de gestion pour un atelier de couture : clients, comma
 
 **Stack :** React + Vite | Node.js + Express | MongoDB + Mongoose | JWT Auth
 
+🔗 **Démo en ligne :** https://couture1.vercel.app
+
 ---
 
 ## Fonctionnalités
