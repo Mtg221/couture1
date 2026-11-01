@@ -62,16 +62,17 @@ export default function Sidebar({ isOpen, onClose }) {
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Logo */}
-        <div className="p-6 border-b border-gray-100">
-          <Link to="/" className="flex items-center justify-center">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <Link to="/" className="flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 rounded-lg">
             <img src={logo} alt="NKG Couture" className="h-12 w-auto transition-transform duration-300 hover:scale-105" />
           </Link>
           {/* Bouton fermer (mobile only) */}
           <button 
             onClick={onClose}
-            className="md:hidden absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            aria-label="Fermer le menu"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -79,31 +80,35 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Navigation */}
         <nav className="p-4 space-y-1">
-          {menuItems.map(item => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
-                pathname === item.to
-                  ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-                  : 'text-gray-600 hover:bg-rose-50 hover:text-rose-500'
-              }`}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          ))}
+          {menuItems.map(item => {
+            const isActive = pathname === item.to;
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={onClose}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${
+                  isActive
+                    ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 font-semibold'
+                    : 'text-gray-700 hover:bg-rose-50 hover:text-rose-600'
+                }`}
+              >
+                <span className="flex-shrink-0" aria-hidden="true">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Footer sidebar */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white">
           <Link
             to="/"
             onClick={onClose}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-rose-500 transition-all duration-300"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-rose-600 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             <span>Retour au site</span>

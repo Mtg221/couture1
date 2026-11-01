@@ -24,10 +24,10 @@ export default function Dashboard() {
   }, []);
 
   if (!stats) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center" role="status" aria-live="polite">
       <div className="text-center">
-        <div className="animate-spin w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-gray-400">Chargement...</p>
+        <div className="animate-spin w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full mx-auto mb-4" aria-hidden="true" />
+        <p className="text-gray-500 font-medium">Chargement du tableau de bord...</p>
       </div>
     </div>
   );
@@ -45,29 +45,32 @@ export default function Dashboard() {
             {/* Bouton hamburger (mobile) */}
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 text-gray-600 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all duration-300"
+              aria-label="Ouvrir le menu de navigation"
+              aria-expanded={sidebarOpen}
+              className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-700 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-800">Tableau de bord</h1>
-              <p className="text-xs md:text-sm text-gray-500 mt-1 hidden sm:block">Bienvenue sur votre espace d'administration</p>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Tableau de bord</h1>
+              <p className="text-xs md:text-sm text-gray-500 mt-0.5 hidden sm:block">Aperçu en temps réel de votre atelier</p>
             </div>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="flex items-center gap-2 md:gap-3 bg-gray-50 px-3 md:px-4 py-2 rounded-xl">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-rose-500 rounded-full flex items-center justify-center text-white font-semibold text-sm md:text-base">
+            <div className="flex items-center gap-2 md:gap-3 bg-gray-50 px-3 md:px-4 py-2 rounded-xl border border-gray-100">
+              <div className="w-8 h-8 md:w-9 md:h-9 bg-rose-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm" aria-hidden="true">
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
-              <span className="text-xs md:text-sm font-medium text-gray-700 hidden sm:block">{user?.username}</span>
+              <span className="text-xs md:text-sm font-semibold text-gray-700 hidden sm:block">{user?.username}</span>
             </div>
             <button 
               onClick={logout} 
-              className="flex items-center gap-1 md:gap-2 text-xs md:text-sm text-rose-500 hover:text-rose-600 font-medium px-3 md:px-4 py-2 rounded-xl hover:bg-rose-50 transition-all duration-300"
+              aria-label="Se déconnecter"
+              className="flex items-center gap-1 md:gap-2 text-xs md:text-sm text-rose-600 hover:text-rose-700 font-medium px-3 md:px-4 py-2 rounded-xl hover:bg-rose-50 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
             >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               <span className="hidden sm:inline">Déconnexion</span>
@@ -109,15 +112,15 @@ export default function Dashboard() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-4 md:px-8 py-4 md:py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-white to-gray-50">
               <div>
-                <h2 className="font-bold text-gray-800 text-base md:text-lg">Commandes récentes</h2>
-                <p className="text-xs md:text-sm text-gray-500 mt-1 hidden sm:block">Les dernières commandes passées</p>
+                <h2 className="font-bold text-gray-900 text-base md:text-lg">Commandes récentes</h2>
+                <p className="text-xs md:text-sm text-gray-500 mt-0.5 hidden sm:block">Les dernières commandes passées à l'atelier</p>
               </div>
               <Link 
                 to="/admin/commandes" 
-                className="inline-flex items-center gap-1 md:gap-2 text-xs md:text-sm text-rose-500 hover:text-rose-600 font-medium bg-rose-50 hover:bg-rose-100 px-3 md:px-4 py-1.5 md:py-2 rounded-xl transition-all duration-300"
+                className="inline-flex items-center gap-1 md:gap-2 text-xs md:text-sm text-rose-600 hover:text-rose-700 font-semibold bg-rose-50 hover:bg-rose-100 px-3.5 md:px-4 py-2 rounded-xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 min-h-[38px]"
               >
                 Voir tout
-                <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
@@ -127,29 +130,29 @@ export default function Dashboard() {
                 <Link 
                   key={c._id} 
                   to={`/admin/commandes/${c._id}`}
-                  className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4 hover:bg-gray-50 transition-all duration-300 group min-w-[600px]"
+                  className="flex items-center justify-between px-4 md:px-8 py-3.5 md:py-4 hover:bg-gray-50/80 transition-all duration-200 group min-w-[600px] focus-visible:outline-none focus-visible:bg-rose-50/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-500"
                 >
                   <div className="flex items-center gap-3 md:gap-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-md flex-shrink-0">
+                    <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-sm flex-shrink-0" aria-hidden="true">
                       {c.client?.nom?.charAt(0).toUpperCase() || 'C'}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-800 group-hover:text-rose-600 transition-colors text-xs md:text-base truncate">
+                      <p className="font-semibold text-gray-900 group-hover:text-rose-600 transition-colors text-sm md:text-base truncate">
                         {c.client?.nom || 'Client inconnu'}
                       </p>
                       <p className="text-xs md:text-sm text-gray-500 truncate">
-                        {c.vetements?.[0]?.typeVetement || c.typeVetement || 'Commande'}
+                        {c.vetements?.[0]?.typeVetement || c.typeVetement || 'Commande sur mesure'}
                         {c.vetements && c.vetements.length > 1 && (
-                          <span className="text-xs text-gray-400 ml-1 hidden sm:inline">(+{c.vetements.length - 1} autres)</span>
+                          <span className="text-xs text-gray-400 ml-1 hidden sm:inline">(+{c.vetements.length - 1} autre{c.vetements.length > 2 ? 's' : ''})</span>
                         )}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-                    <span className={`text-xs px-2 md:px-3 py-1 rounded-full font-medium whitespace-nowrap ${STATUT_COLORS[c.vetements?.[0]?.statut || c.statut]}`}>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap capitalize ${STATUT_COLORS[c.vetements?.[0]?.statut || c.statut] || 'bg-gray-100 text-gray-700'}`}>
                       {(c.vetements?.[0]?.statut || c.statut || 'en_attente').replace('_', ' ')}
                     </span>
-                    <svg className="w-4 h-5 text-gray-400 group-hover:text-rose-500 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-400 group-hover:text-rose-600 transition-all group-hover:translate-x-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>

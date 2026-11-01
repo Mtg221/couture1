@@ -26,11 +26,12 @@ export default function Navbar() {
             <Link
               key={l.to}
               to={l.to}
-              className={`text-sm font-medium transition-all duration-300 relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-0.5 after:bg-rose-500 after:transition-all after:duration-300 hover:after:w-full ${
+              aria-current={pathname === l.to ? 'page' : undefined}
+              className={`text-sm font-medium transition-all duration-300 relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 rounded-lg after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-0.5 after:bg-rose-500 after:transition-all after:duration-300 hover:after:w-full ${
                 l.auth
                   ? 'bg-rose-500 text-white px-5 py-2.5 rounded-xl hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30 after:hidden'
                   : pathname === l.to
-                    ? 'text-rose-600 after:w-full'
+                    ? 'text-rose-600 after:w-full font-semibold'
                     : 'text-gray-600 hover:text-rose-500'
               }`}
             >
@@ -41,10 +42,13 @@ export default function Navbar() {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-gray-600 hover:text-rose-500 transition-colors duration-300"
+          className="md:hidden min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-gray-700 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
           onClick={() => setOpen(!open)}
+          aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={open}
+          aria-controls="mobile-navigation"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d={open ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
           </svg>
@@ -53,16 +57,19 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-100 px-4 pb-4 flex flex-col gap-3 animate-fade-in">
+        <div id="mobile-navigation" className="md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-100 px-4 pb-4 flex flex-col gap-3 animate-fade-in">
           {links.map(l => (
             <Link
               key={l.to}
               to={l.to}
               onClick={() => setOpen(false)}
-              className={`py-3 font-medium rounded-xl transition-all duration-300 ${
+              aria-current={pathname === l.to ? 'page' : undefined}
+              className={`py-3 px-4 font-medium rounded-xl transition-all duration-200 min-h-[44px] flex items-center ${
                 l.auth
-                  ? 'bg-rose-500 text-white px-4 text-center hover:bg-rose-600'
-                  : 'text-gray-700 hover:bg-rose-50 hover:text-rose-500'
+                  ? 'bg-rose-500 text-white justify-center hover:bg-rose-600 shadow-md shadow-rose-500/20'
+                  : pathname === l.to
+                    ? 'bg-rose-50 text-rose-600 font-semibold'
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-rose-500'
               }`}
             >
               {l.label}
